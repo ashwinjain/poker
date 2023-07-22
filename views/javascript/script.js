@@ -88,6 +88,9 @@ function dealCards(x) {
 // check button
 function check() {
   socket.emit("check-requested");
+  disableBetButtons();
+
+  enable("deal_button");
 }
 
 // raise button
