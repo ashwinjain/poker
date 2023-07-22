@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <!--meta data-->
+    <meta charset="UTF-8" />
+    <meta name="description" content="Poker" />
+    <meta name="keywords" content="HTML, CSS, JavaScript" />
+    <meta name="author" content="Ashwin Jain" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0 maximum-scale=1, user-scalable=no"
+    />
+
+    <!--Linking stylesheet-->
+    <link rel="stylesheet" href="style.css" />
+
+    <!--Linking javascript-->
+    <script defer src="javascript/script.js"></script>
+    <script defer src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script
+      src="https://kit.fontawesome.com/e6921743c9.js"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+    <title>Texas Hold 'em Poker</title>
+    <h1 class="head_title">Texas Hold 'em Poker</h1>
+  </head>
+  <body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.js"></script>
+
+    <button id="start" onclick="startGame()">Start</button>
+    <div class="table">
+      <div id="user_hand">
+        <div class="user_card">
+          <img
+            class="card"
+            id="user_first"
+            src="data/images/cards/card_back.png"
+            alt="card_back"
+          />
+        </div>
+        <div class="user_card">
+          <img
+            class="card"
+            id="user_second"
+            src="data/images/cards/card_back.png"
+            alt="card_back"
+          />
+        </div>
+      </div>
+      <div class="comm_hand">
+        <img
+          class="card_flop"
+          src="data/images/cards/card_back.png"
+          alt="card_back"
+        />
+        <img
+          class="card_flop"
+          src="data/images/cards/card_back.png"
+          alt="card_back"
+        />
+        <img
+          class="card_flop"
+          src="data/images/cards/card_back.png"
+          alt="card_back"
+        />
+        <img
+          class="card_turn"
+          id="turn"
+          src="data/images/cards/card_back.png"
+          alt="card_back"
+        />
+        <img
+          class="card_river"
+          id="river"
+          src="data/images/cards/card_back.png"
+          alt="card_back"
+        />
+      </div>
+      <div id="p1_hand">
+        <div class="p1_card">
+          <img
+            class="card"
+            id="p1_first"
+            src="data/images/cards/card_back.png"
+            alt="card_back"
+          />
+        </div>
+        <div class="p1_card">
+          <img
+            class="card"
+            id="p1_second"
+            src="data/images/cards/card_back.png"
+            alt="card_back"
+          />
+        </div>
+      </div>
+      <div id="p2_hand">
+        <div class="p2_card">
+          <img
+            class="card"
+            id="p2_first"
+            src="data/images/cards/card_back.png"
+            alt="card_back"
+          />
+        </div>
+        <div class="p2_card">
+          <img
+            class="card"
+            id="p2_second"
+            src="data/images/cards/card_back.png"
+            alt="card_back"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Other players -->
+    <p id="friend" style="color: brown">No players yet</p>
+
+    <div class="actions">
+      <button id="deal_button" class="action_button" onclick="dealCards(this)">
+        Deal
+      </button>
+      <div id="bet_buttons">
+        <button class="action_button" id="check_button" onclick="check()">
+          Check
+        </button>
+        <div>
+          <form id="raise_form">
+            <div class="raise">
+              <button
+                type="submit"
+                class="action_button"
+                id="raise_button"
+                onclick="raise()"
+              >
+                Raise
+              </button>
+            </div>
+            <div class="raise">
+              <input type="number" id="raise_amount" required />
+            </div>
+          </form>
+        </div>
+        <button class="action_button" id="fold_button" onclick="fold()">
+          Fold
+        </button>
+      </div>
+      <div>
+        <p id="pot">$0</p>
+      </div>
+    </div>
+  </body>
+</html>

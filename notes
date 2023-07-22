@@ -1,0 +1,9 @@
+1. every player should be sitting at the user hand table
+2. every player only has access to the data of their hand
+3. every other hand at the table should show 'card_back' with no underlying card data
+4. BackendPlayer {name, stack, hand}
+5. FrontendPlayer {name, stack} (check, bet, raise, fold)
+6. Common data {FrontendPlayers...., pot}
+7. Create a Poker game class {pot, button, big blind, small blind, actor, state}
+
+

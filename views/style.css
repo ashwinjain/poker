@@ -1,0 +1,200 @@
+html {
+  /* background-color: rgb(5, 76, 5); */
+  background-image: url("data/images/poker.jpeg");
+  background-size: cover;
+  height: 100%;
+}
+
+body {
+  height: 100%;
+  overflow: hidden;
+}
+.head_title {
+  text-align: center;
+  color: darkred;
+  text-shadow: 2px 5px #441111;
+  font-size: 50px;
+}
+
+.actions {
+  position: absolute;
+  width: fit-content;
+  height: fit-content;
+  right: 0px;
+  top: 36%;
+}
+
+.action_button {
+  width: 80px;
+  height: 40px;
+  display: block;
+  margin: 10px;
+  color: black;
+  font-size: 20px;
+  background-color: brown;
+  border-color: black;
+  border-radius: 30px;
+  box-shadow: 2px 5px #541515;
+}
+.check_button {
+  width: 80px;
+  height: 40px;
+  display: block;
+  margin: 10px;
+}
+.raise_button {
+  width: 80px;
+  height: 40px;
+  display: block;
+  margin: 10px;
+}
+.fold_button {
+  width: 80px;
+  height: 40px;
+  display: block;
+  margin: 10px;
+}
+#user_hand {
+  position: absolute;
+  width: fit-content;
+  height: fit-content;
+  bottom: 0px;
+  left: 41.5%;
+}
+#p1_hand {
+  position: absolute;
+  width: fit-content;
+  top: 39%;
+  transform: scale(0.6) rotate(90deg);
+}
+
+#p2_hand {
+  position: absolute;
+  width: fit-content;
+  right: 0px;
+  top: 39%;
+  transform: scale(0.6) rotate(90deg);
+}
+.comm_hand {
+  position: absolute;
+  width: fit-content;
+  height: fit-content;
+  left: 28.5%;
+  top: 20%;
+}
+
+.card {
+  width: 70px;
+  height: 100px;
+}
+.card_flop {
+  width: 70px;
+  height: 100px;
+}
+.card_turn {
+  width: 70px;
+  height: 100px;
+}
+
+.card_river {
+  width: 70px;
+  height: 100px;
+}
+
+.user_card {
+  padding: 2px;
+  display: inline-block;
+}
+
+.p1_card {
+  padding: 2px;
+  display: inline-block;
+}
+
+.p2_card {
+  padding: 2px;
+  display: inline-block;
+}
+.comm_card {
+  padding: 2px;
+  display: inline-block;
+  width: fit-content;
+}
+
+.flop {
+  position: relative;
+  width: fit-content;
+  display: inline-block;
+  opacity: 0;
+  margin: 2px;
+}
+
+.raise {
+  position: relative;
+  display: inline-block;
+}
+#turn {
+  position: relative;
+  display: inline-block;
+}
+#river {
+  position: relative;
+  display: inline-block;
+}
+
+#pot {
+  font-size: xx-large;
+  font-weight: bold;
+  color: brown;
+}
+
+#start {
+  position: absolute;
+  width: 100px;
+  height: 50px;
+  top: 55%;
+  left: 46.5%;
+  color: black;
+  font-size: 25px;
+  font-weight: bold;
+  background-color: brown;
+  border-color: brown;
+  border-radius: 30px;
+  box-shadow: 2px 5px #541515;
+  z-index: 1;
+}
+
+#raise_amount {
+  width: 40px;
+  height: 20px;
+  border-color: #441111;
+  border-radius: 10px;
+  size: 40px;
+}
+
+#deal_button {
+  opacity: 0;
+}
+
+#bet_buttons {
+  opacity: 0;
+}
+
+#pot {
+  opacity: 0;
+}
+
+.table {
+  width: 65%;
+  height: 52%;
+  position: relative;
+  top: 18%;
+  margin: auto;
+  z-index: -1;
+}
+
+/* div {
+  border: solid;
+  border-color: white;
+  border-width: 1px;
+} */
