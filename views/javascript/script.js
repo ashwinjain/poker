@@ -4,6 +4,7 @@ var pot = 0;
 // initializing frontend client
 const socket = io("http://localhost:3000");
 
+var players = {};
 // event handler for dealing the user
 socket.on("deal-user-hand", (player) => {
   var cardImages = document.getElementsByClassName("card");
@@ -42,10 +43,23 @@ socket.on("start-granted", () => {
   disable("deal_button");
 });
 
-socket.on("check-granted", () => {
-  disableBetButtons();
+socket.on("check-granted", (prev_id, next_id) => {
+  if (socket.id == prev_id) {
+    disableBetButtons();
+  }
+  if (socket.id == next_id) {
+    console.log(prev_id);
+  }
 
-  enable("deal_button");
+  // enable("deal_button");
+});
+
+socket.on("deal-next-card", () => {
+  console.log("deal-next-card");
+});
+
+socket.on("check", (id) => {
+  console.log(id + " checks");
 });
 
 socket.on("raise-granted", () => {
@@ -87,10 +101,7 @@ function dealCards(x) {
 
 // check button
 function check() {
-  socket.emit("check-requested");
-  disableBetButtons();
-
-  enable("deal_button");
+  socket.emit("check-request");
 }
 
 // raise button

@@ -49,6 +49,7 @@ var state = "deal_flop";
 var DEAL_STATES = ["deal_flop", "deal_turn", "deal_river"];
 var curr_deal_state = dealIter();
 var backendPlayers = {};
+var num_players = 0;
 var game_position = 0;
 var table_position = 0;
 
@@ -61,10 +62,12 @@ io.on("connection", (socket) => {
     50,
     game_position++,
     table_position++,
-    true
+    false,
+    false
   );
   backendPlayers[socket.id] = player;
 
+  num_players += 1;
   socket.on("deal-request", () => {
     console.log(state);
     switch (state) {
@@ -89,10 +92,31 @@ io.on("connection", (socket) => {
   socket.on("start-request", () => {
     const player = backendPlayers[socket.id];
     if (player.game_position == 0) {
-      console.log("start granted");
+      player.first_to_act = true;
+      player.actor = true;
       io.emit("start-granted");
       for (const id in backendPlayers) {
         io.to(id).emit("deal-user-hand", backendPlayers[id]);
+      }
+    }
+  });
+
+  socket.on("check-request", () => {
+    const player = backendPlayers[socket.id];
+    console.log(player.actor);
+    if (player.actor == true) {
+      player.actor = false;
+      const next_game_position = player.game_position + 1;
+      console.log(backendPlayers.length);
+      for (const id in backendPlayers) {
+        const curr_player = backendPlayers[id];
+        if (curr_player.game_position == next_game_position) {
+          curr_player.actor = true;
+          io.emit("check-granted", socket.id, id);
+        } else if (num_players == next_game_position) {
+          console.log("deal next card");
+          io.emit("deal-next-card");
+        }
       }
     }
   });
@@ -141,13 +165,22 @@ function dealIter() {
 
 class Player {
   // constructor(x, y, stack, name, image, first, second) {
-  constructor(name, hand, stack, game_position, table_position, actor) {
+  constructor(
+    name,
+    hand,
+    stack,
+    game_position,
+    table_position,
+    actor,
+    first_to_act
+  ) {
     this.name = name;
     this.hand = hand;
     this.stack = stack;
     this.game_position = game_position;
     this.table_position = table_position;
     this.actor = actor;
+    this.first_to_act = first_to_act;
   }
 }
 
