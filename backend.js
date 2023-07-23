@@ -107,14 +107,12 @@ io.on("connection", (socket) => {
     if (player.actor == true) {
       player.actor = false;
       const next_game_position = player.game_position + 1;
-      console.log(backendPlayers.length);
       for (const id in backendPlayers) {
         const curr_player = backendPlayers[id];
         if (curr_player.game_position == next_game_position) {
           curr_player.actor = true;
           io.emit("check-granted", socket.id, id);
         } else if (num_players == next_game_position) {
-          console.log("deal next card");
           io.emit("deal-next-card");
         }
       }
