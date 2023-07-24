@@ -52,6 +52,7 @@ var backendPlayers = {};
 var num_players = 0;
 var game_position = 0;
 var table_position = 0;
+var utg;
 
 // socket on connection
 io.on("connection", (socket) => {
@@ -68,6 +69,9 @@ io.on("connection", (socket) => {
   backendPlayers[socket.id] = player;
 
   num_players += 1;
+  if (num_players == 1) {
+    utg = socket.id;
+  }
   socket.on("deal-request", () => {
     console.log(state);
     switch (state) {
@@ -112,8 +116,27 @@ io.on("connection", (socket) => {
         if (curr_player.game_position == next_game_position) {
           curr_player.actor = true;
           io.emit("check-granted", socket.id, id);
+          break;
         } else if (num_players == next_game_position) {
-          io.emit("deal-next-card");
+          backendPlayers[utg].actor = true;
+          console.log(state);
+
+          switch (state) {
+            case "deal_flop":
+              io.emit("deal-flop", flop);
+              state = "deal_turn";
+              break;
+            case "deal_turn":
+              io.emit("deal-turn", turn);
+              state = "deal_river";
+              break;
+            case "deal_river":
+              io.emit("deal-river", river);
+              break;
+          }
+
+          io.to(utg).emit("dealt");
+          break;
         }
       }
     }

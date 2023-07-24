@@ -47,15 +47,6 @@ socket.on("check-granted", (prev_id, next_id) => {
   if (socket.id == prev_id) {
     disableBetButtons();
   }
-  if (socket.id == next_id) {
-    console.log(prev_id);
-  }
-
-  // enable("deal_button");
-});
-
-socket.on("deal-next-card", () => {
-  console.log("deal-next-card");
 });
 
 socket.on("check", (id) => {
@@ -76,6 +67,12 @@ socket.on("fold-granted", () => {
   reset();
 });
 
+socket.on("dealt", () => {
+  console.log("action on me ");
+  enable("check_button");
+  enable("raise_button");
+  enable("fold_button");
+});
 /*
   these next functions are all button onClick event handlers
   */
