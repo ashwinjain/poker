@@ -12,6 +12,7 @@ socket.on("deal-user-hand", (player) => {
   cardImages[0].src = "data/images/cards/z" + player.hand.first + ".png";
   cardImages[1].src = "data/images/cards/z" + player.hand.second + ".png";
   // }
+  document.getElementById("friend").innerText = socket.id;
   console.log(player);
 });
 
@@ -85,17 +86,6 @@ function startGame() {
   socket.emit("start-request");
 }
 
-// deals the next card
-function dealCards(x) {
-  socket.emit("deal-request");
-  disable("deal_button");
-
-  document.getElementById("bet_buttons").style.opacity = 1;
-  enable("check_button");
-  enable("raise_button");
-  enable("fold_button");
-}
-
 // check button
 function check() {
   socket.emit("check-request");
@@ -103,13 +93,13 @@ function check() {
 
 // raise button
 function raise() {
-  socket.emit("raise-requested");
+  socket.emit("raise-request");
 }
 
 // fold button
 function fold() {
   // change to "bet_call" when adding more players
-  socket.emit("fold-requested");
+  socket.emit("fold-request");
 }
 
 /* Helper methods

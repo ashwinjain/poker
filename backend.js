@@ -72,27 +72,6 @@ io.on("connection", (socket) => {
   if (num_players == 1) {
     utg = socket.id;
   }
-  socket.on("deal-request", () => {
-    console.log(state);
-    switch (state) {
-      case "deal_flop":
-        io.emit("deal-flop", flop);
-        // state = curr_deal_state.next().value;
-        state = "deal_turn";
-        break;
-      case "deal_turn":
-        io.emit("deal-turn", turn);
-        // state = curr_deal_state.next().value;
-        state = "deal_river";
-        break;
-      case "deal_river":
-        io.emit("deal-river", river);
-        // state = curr_deal_state.next().value;
-        break;
-      default:
-        break;
-    }
-  });
   socket.on("start-request", () => {
     const player = backendPlayers[socket.id];
     if (player.game_position == 0) {
@@ -141,6 +120,11 @@ io.on("connection", (socket) => {
       }
     }
   });
+
+  // socket.on("disconnect", (reason) => {
+  //   console.log(reason);
+  //   delete backendPlayers[socket.id];
+  // });
 });
 
 const port = 5500;
