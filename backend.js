@@ -45,9 +45,10 @@ const turn = cards.shift();
 const river = cards.shift();
 
 // state variables
+var pot = 0;
 var state = "deal_flop";
 var DEAL_STATES = ["deal_flop", "deal_turn", "deal_river"];
-var curr_deal_state = dealIter();
+var state = "deal_flop";
 var backendPlayers = {};
 var num_players = 0;
 var game_position = 0;
@@ -100,19 +101,7 @@ io.on("connection", (socket) => {
           backendPlayers[utg].actor = true;
           console.log(state);
 
-          switch (state) {
-            case "deal_flop":
-              io.emit("deal-flop", flop);
-              state = "deal_turn";
-              break;
-            case "deal_turn":
-              io.emit("deal-turn", turn);
-              state = "deal_river";
-              break;
-            case "deal_river":
-              io.emit("deal-river", river);
-              break;
-          }
+          dealNextCard(state);
 
           io.to(utg).emit("dealt");
           break;
@@ -121,6 +110,17 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("raise-request", (raise) => {
+    console.log(backendPlayers[socket.id].actor);
+    if (backendPlayers[socket.id].actor == true) {
+      for (const id in backendPlayers) {
+        backendPlayers[id].first_to_act = false;
+      }
+      backendPlayers[socket.id].first_to_act = true;
+      pot += parseInt(raise);
+      socket.emit("raise-granted", pot);
+    }
+  });
   // socket.on("disconnect", (reason) => {
   //   console.log(reason);
   //   delete backendPlayers[socket.id];
@@ -166,6 +166,22 @@ function dealIter() {
       return { value: deal_state, done: false };
     },
   };
+}
+
+function dealNextCard() {
+  switch (state) {
+    case "deal_flop":
+      io.emit("deal-flop", flop);
+      state = "deal_turn";
+      break;
+    case "deal_turn":
+      io.emit("deal-turn", turn);
+      state = "deal_river";
+      break;
+    case "deal_river":
+      io.emit("deal-river", river);
+      break;
+  }
 }
 
 class Player {

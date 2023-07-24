@@ -121,30 +121,28 @@
     <p id="friend" style="color: brown">No players yet</p>
 
     <div class="actions">
-      <button id="deal_button" class="action_button" onclick="dealCards(this)">
-        Deal
-      </button>
       <div id="bet_buttons">
         <button class="action_button" id="check_button" onclick="check()">
           Check
         </button>
         <div>
+          <button class="action_button" id="raise_button" onclick="raise()">
+            Raise
+          </button>
+          <input type="number" id="raise_amount" required />
+        </div>
+        <!-- <div>
           <form id="raise_form">
             <div class="raise">
-              <button
-                type="submit"
-                class="action_button"
-                id="raise_button"
-                onclick="raise()"
-              >
-                Raise
-              </button>
+              
+
+              BUTTON HERE
+
             </div>
             <div class="raise">
-              <input type="number" id="raise_amount" required />
             </div>
           </form>
-        </div>
+        </div> -->
         <button class="action_button" id="fold_button" onclick="fold()">
           Fold
         </button>

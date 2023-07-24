@@ -1,6 +1,3 @@
-// keeps track of pot - likely to move to backend
-var pot = 0;
-
 // initializing frontend client
 const socket = io("http://localhost:3000");
 
@@ -41,7 +38,6 @@ socket.on("start-granted", () => {
   document.getElementById("start").style.display = "none";
   document.getElementById("bet_buttons").style.opacity = 1;
   document.getElementById("pot").style.opacity = 1;
-  disable("deal_button");
 });
 
 socket.on("check-granted", (prev_id, next_id) => {
@@ -50,30 +46,20 @@ socket.on("check-granted", (prev_id, next_id) => {
   }
 });
 
-socket.on("check", (id) => {
-  console.log(id + " checks");
-});
-
-socket.on("raise-granted", () => {
-  const raiseAmount = raiseInput.value;
-  console.log(raiseAmount);
-
-  pot += parseInt(raiseAmount);
-  updatePot();
-
+socket.on("raise-granted", (pot) => {
+  updatePot(pot);
   disableBetButtons();
-  enable("deal_button");
 });
 socket.on("fold-granted", () => {
-  reset();
+  // reset();
 });
 
 socket.on("dealt", () => {
-  console.log("action on me ");
   enable("check_button");
   enable("raise_button");
   enable("fold_button");
 });
+
 /*
   these next functions are all button onClick event handlers
   */
@@ -93,7 +79,8 @@ function check() {
 
 // raise button
 function raise() {
-  socket.emit("raise-request");
+  const raise = document.getElementById("raise_amount").value;
+  socket.emit("raise-request", raise);
 }
 
 // fold button
@@ -121,14 +108,12 @@ function reset() {
   }
 
   // reset pot
-  pot = 0;
-  updatePot();
 
   document.getElementById("start").style.display = "block"; // reset start button
 }
 
 // changes UI pot value
-function updatePot() {
+function updatePot(pot) {
   document.getElementById("pot").innerHTML = "$" + pot.toString();
 }
 
