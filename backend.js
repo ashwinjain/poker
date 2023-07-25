@@ -66,6 +66,12 @@ io.on("connection", (socket) => {
   if (num_players == 1) {
     utg = socket.id;
   }
+
+  /**
+   * on start
+   *    disable everyones actions buttons
+   *    enable only current users actions buttons
+   */
   socket.on("start-request", () => {
     const player = backendPlayers[socket.id];
     if (player.game_position == 0) {
@@ -75,6 +81,7 @@ io.on("connection", (socket) => {
       for (const id in backendPlayers) {
         io.to(id).emit("deal-user-hand", backendPlayers[id]);
       }
+      io.to(socket.id).emit("enable-action-buttons");
     }
   });
 
@@ -89,14 +96,15 @@ io.on("connection", (socket) => {
         if (curr_player.game_position == next_game_position) {
           curr_player.actor = true;
           io.emit("check-granted", socket.id, id);
+          io.to(id).emit("enable-action-buttons");
           break;
         } else if (num_players == next_game_position) {
           backendPlayers[utg].actor = true;
           console.log(state);
 
           dealNextCard(state);
-
-          io.to(utg).emit("dealt");
+          io.emit("check-granted", socket.id, id);
+          io.to(utg).emit("enable-action-buttons");
           break;
         }
       }

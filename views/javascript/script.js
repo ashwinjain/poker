@@ -11,6 +11,14 @@ socket.on("deal-user-hand", (player) => {
   // }
   document.getElementById("friend").innerText = socket.id;
   console.log(player);
+  disableBetButtons();
+});
+
+socket.on("enable-action-buttons", () => {
+  enable("check_button");
+  enable("raise_button");
+  enable("fold_button");
+  console.log("enabled");
 });
 
 // event handler for dealing the flop
@@ -41,6 +49,7 @@ socket.on("start-granted", () => {
 });
 
 socket.on("check-granted", (prev_id, next_id) => {
+  // add code that shows a check for everyone
   if (socket.id == prev_id) {
     disableBetButtons();
   }
