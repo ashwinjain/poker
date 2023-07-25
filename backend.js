@@ -19,11 +19,6 @@
     - showdown
  */
 
-// import { Player } from "/views/javascript/classes/Player.js";
-// const Player = require("/Users/ashwinjain/Development/Personal/poker/views/javascript/classes/Player.js");
-// const Hand = require("/Users/ashwinjain/Development/Personal/poker/views/javascript/classes/Hand.js");
-// const Card = require("/Users/ashwinjain/Development/Personal/poker/views/javascript/classes/Card.js");
-
 // setting up express frontend server
 const express = require("express");
 
@@ -46,8 +41,6 @@ const river = cards.shift();
 
 // state variables
 var pot = 0;
-var state = "deal_flop";
-var DEAL_STATES = ["deal_flop", "deal_turn", "deal_river"];
 var state = "deal_flop";
 var backendPlayers = {};
 var num_players = 0;
@@ -111,14 +104,27 @@ io.on("connection", (socket) => {
   });
 
   socket.on("raise-request", (raise) => {
-    console.log(backendPlayers[socket.id].actor);
-    if (backendPlayers[socket.id].actor == true) {
+    const player = backendPlayers[socket.id];
+    console.log(player.actor);
+    if (player.actor == true) {
+      const next_game_position = (player.game_position + 1) % num_players;
       for (const id in backendPlayers) {
         backendPlayers[id].first_to_act = false;
       }
-      backendPlayers[socket.id].first_to_act = true;
+      player.first_to_act = true;
+      player.stack -= raise;
+
       pot += parseInt(raise);
-      socket.emit("raise-granted", pot);
+
+      for (const id in backendPlayers) {
+        const curr_player = backendPlayers[id];
+        if (curr_player.game_position == next_game_position) {
+          curr_player.actor = true;
+          io.emit("raise-granted", socket.id, pot);
+
+          break;
+        }
+      }
     }
   });
   // socket.on("disconnect", (reason) => {
@@ -154,18 +160,6 @@ function retrieveCards(numPlayers) {
     }
   }
   return retval;
-}
-
-// iterator for the deal states
-function dealIter() {
-  let deal_state = "";
-  let n = -1;
-  return {
-    next: function () {
-      deal_state = DEAL_STATES[++n];
-      return { value: deal_state, done: false };
-    },
-  };
 }
 
 function dealNextCard() {

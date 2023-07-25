@@ -46,18 +46,14 @@ socket.on("check-granted", (prev_id, next_id) => {
   }
 });
 
-socket.on("raise-granted", (pot) => {
+socket.on("raise-granted", (id, pot) => {
   updatePot(pot);
-  disableBetButtons();
+  if (socket.id == id) {
+    disableBetButtons();
+  }
 });
 socket.on("fold-granted", () => {
   // reset();
-});
-
-socket.on("dealt", () => {
-  enable("check_button");
-  enable("raise_button");
-  enable("fold_button");
 });
 
 /*
