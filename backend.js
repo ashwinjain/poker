@@ -183,6 +183,25 @@ io.on("connection", (socket) => {
       }
     }
   });
+
+  socket.on("fold-request", () => {
+    if (curr_raise != 0) {
+      const position = backendPlayers[socket.id].game_position;
+      backendPlayers[socket.id].game_position = -1;
+      num_players--;
+      io.to(socket.id).emit("fold-granted");
+      for (const id in backendPlayers) {
+        const player = backendPlayers[id];
+        if (player.game_position > position) {
+          player.game_position--;
+          if (player.game_position == position) {
+            player.actor = true;
+            io.to(id).emit("switch-check-call");
+          }
+        }
+      }
+    }
+  });
   // socket.on("disconnect", (reason) => {
   //   console.log(reason);
   //   delete backendPlayers[socket.id];
@@ -219,6 +238,7 @@ function retrieveCards(numPlayers) {
 }
 
 function dealNextCard() {
+  curr_raise = 0;
   switch (state) {
     case "deal_flop":
       io.emit("deal-flop", flop);
@@ -230,7 +250,10 @@ function dealNextCard() {
       break;
     case "deal_river":
       io.emit("deal-river", river);
+      state = "showdown";
       break;
+    case "showdown":
+      io.emit("showdown");
   }
 }
 

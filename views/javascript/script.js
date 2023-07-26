@@ -78,7 +78,7 @@ socket.on("switch-check-call", () => {
   enable("call_button");
 });
 socket.on("fold-granted", () => {
-  // reset();
+  disableBetButtons();
 });
 
 /*
@@ -101,7 +101,9 @@ function check() {
 // raise button
 function raise() {
   const raise = document.getElementById("raise_amount").value;
-  socket.emit("raise-request", raise);
+  if (raise != "") {
+    socket.emit("raise-request", raise);
+  }
 }
 
 // call button
