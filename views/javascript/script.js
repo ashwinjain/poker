@@ -49,7 +49,9 @@ socket.on("start-granted", () => {
 });
 
 socket.on("check-granted", (prev_id, next_id) => {
-  // add code that shows a check for everyone
+  // add code that shows a check for everyone...
+
+  //
   if (socket.id == prev_id) {
     disableBetButtons();
   }
@@ -60,6 +62,20 @@ socket.on("raise-granted", (id, pot) => {
   if (socket.id == id) {
     disableBetButtons();
   }
+});
+
+socket.on("call-granted", (id, pot) => {
+  updatePot(pot);
+  if (socket.id == id) {
+    disableBetButtons();
+  }
+});
+
+socket.on("switch-check-call", () => {
+  // disable("check_button");
+  enable("raise_button");
+  enable("fold_button");
+  enable("call_button");
 });
 socket.on("fold-granted", () => {
   // reset();
@@ -88,6 +104,10 @@ function raise() {
   socket.emit("raise-request", raise);
 }
 
+// call button
+function call() {
+  socket.emit("call-request");
+}
 // fold button
 function fold() {
   // change to "bet_call" when adding more players
@@ -140,4 +160,5 @@ function disableBetButtons() {
   disable("check_button");
   disable("raise_button");
   disable("fold_button");
+  disable("call_button");
 }

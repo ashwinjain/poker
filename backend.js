@@ -47,7 +47,7 @@ var num_players = 0;
 var game_position = 0;
 var table_position = 0;
 var utg;
-
+var curr_raise = 0;
 // socket on connection
 io.on("connection", (socket) => {
   const user_hand = new Hand(cards.shift(), cards.shift());
@@ -119,17 +119,65 @@ io.on("connection", (socket) => {
       for (const id in backendPlayers) {
         backendPlayers[id].first_to_act = false;
       }
+      curr_raise = 0;
+
       player.first_to_act = true;
       player.stack -= raise;
 
       pot += parseInt(raise);
+      curr_raise = raise;
 
       for (const id in backendPlayers) {
         const curr_player = backendPlayers[id];
-        if (curr_player.game_position == next_game_position) {
+        if (
+          curr_player.game_position == next_game_position &&
+          curr_player.first_to_act == true
+        ) {
+          curr_player.first_to_act = false;
+          backendPlayers[utg].actor = true;
+          console.log(state);
+          dealNextCard(state);
+          io.emit("check-granted", socket.id, id); // change this to a raise grainted event
+          io.to(utg).emit("enable-action-buttons");
+          break;
+        } else if (curr_player.game_position == next_game_position) {
           curr_player.actor = true;
           io.emit("raise-granted", socket.id, pot);
+          // emit disable check, enable call button
+          io.to(id).emit("switch-check-call");
+          break;
+        }
+      }
+    }
+  });
 
+  socket.on("call-request", () => {
+    const player = backendPlayers[socket.id];
+    console.log(player.actor);
+    if (player.actor == true) {
+      const next_game_position = (player.game_position + 1) % num_players;
+      player.stack -= curr_raise;
+
+      pot += parseInt(curr_raise);
+
+      for (const id in backendPlayers) {
+        const curr_player = backendPlayers[id];
+        if (
+          curr_player.game_position == next_game_position &&
+          curr_player.first_to_act == true
+        ) {
+          curr_player.first_to_act = false;
+          backendPlayers[utg].actor = true;
+          console.log(state);
+          dealNextCard(state);
+          io.emit("call-granted", socket.id, pot);
+          io.to(utg).emit("enable-action-buttons");
+          break;
+        } else if (curr_player.game_position == next_game_position) {
+          curr_player.actor = true;
+          io.emit("call-granted", socket.id, pot);
+          // emit disable check, enable call button
+          io.to(id).emit("switch-check-call");
           break;
         }
       }
