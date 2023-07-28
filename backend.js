@@ -102,10 +102,11 @@ io.on("connection", (socket) => {
         } else if (num_players == next_game_position) {
           backendPlayers[utg].actor = true;
           console.log(state);
-
           dealNextCard(state);
           io.emit("check-granted", socket.id, id);
-          io.to(utg).emit("enable-action-buttons");
+          if (state != "showdown") {
+            io.to(utg).emit("enable-action-buttons");
+          }
           break;
         }
       }
@@ -140,7 +141,9 @@ io.on("connection", (socket) => {
           console.log(state);
           dealNextCard(state);
           io.emit("check-granted", socket.id, id); // change this to a raise grainted event
-          io.to(utg).emit("enable-action-buttons");
+          if (state != "showdown") {
+            io.to(utg).emit("enable-action-buttons");
+          }
           break;
         } else if (curr_player.game_position == next_game_position) {
           curr_player.actor = true;
@@ -178,7 +181,7 @@ io.on("connection", (socket) => {
           }
           dealNextCard(state);
           io.emit("call-granted", socket.id, pot);
-          io.to(utg).emit("enable-action-buttons");
+          if (state != "showdown") io.to(utg).emit("enable-action-buttons");
           break;
         } else if (curr_player.game_position == next_game_position) {
           curr_player.actor = true;
@@ -257,9 +260,10 @@ function dealNextCard() {
       break;
     case "deal_river":
       io.emit("deal-river", river);
-      state = "showdown";
+      state = "final_bet";
       break;
-    case "showdown":
+    case "final_bet":
+      state = "showdown";
       io.emit("showdown");
   }
 }

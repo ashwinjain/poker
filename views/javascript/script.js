@@ -81,6 +81,11 @@ socket.on("fold-granted", () => {
   disableBetButtons();
 });
 
+socket.on("showdown", () => {
+  disableBetButtons();
+  console.log("showdown");
+});
+
 /*
   these next functions are all button onClick event handlers
   */
