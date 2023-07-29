@@ -147,7 +147,12 @@ io.on("connection", (socket) => {
           break;
         } else if (curr_player.game_position == next_game_position) {
           curr_player.actor = true;
-          io.emit("raise-granted", socket.id, pot);
+          io.emit(
+            "raise-granted",
+            socket.id,
+            pot,
+            backendPlayers[socket.id].stack
+          );
           // emit disable check, enable call button
           io.to(id).emit("switch-check-call");
           break;
@@ -180,12 +185,22 @@ io.on("connection", (socket) => {
             backendPlayers[id].stake = 0;
           }
           dealNextCard(state);
-          io.emit("call-granted", socket.id, pot);
+          io.emit(
+            "call-granted",
+            socket.id,
+            pot,
+            backendPlayers[socket.id].stack
+          );
           if (state != "showdown") io.to(utg).emit("enable-action-buttons");
           break;
         } else if (curr_player.game_position == next_game_position) {
           curr_player.actor = true;
-          io.emit("call-granted", socket.id, pot);
+          io.emit(
+            "call-granted",
+            socket.id,
+            pot,
+            backendPlayers[socket.id].stack
+          );
           // emit disable check, enable call button
           io.to(id).emit("switch-check-call");
           break;

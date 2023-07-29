@@ -10,6 +10,7 @@ socket.on("deal-user-hand", (player) => {
   cardImages[1].src = "data/images/cards/z" + player.hand.second + ".png";
   // }
   document.getElementById("friend").innerText = socket.id;
+  document.getElementById("stack").innerHTML = "$" + player.stack;
   console.log(player);
   disableBetButtons();
 });
@@ -57,16 +58,18 @@ socket.on("check-granted", (prev_id, next_id) => {
   }
 });
 
-socket.on("raise-granted", (id, pot) => {
+socket.on("raise-granted", (id, pot, stack) => {
   updatePot(pot);
   if (socket.id == id) {
+    updateStack(stack);
     disableBetButtons();
   }
 });
 
-socket.on("call-granted", (id, pot) => {
+socket.on("call-granted", (id, pot, stack) => {
   updatePot(pot);
   if (socket.id == id) {
+    updateStack(stack);
     disableBetButtons();
   }
 });
@@ -147,6 +150,10 @@ function reset() {
 // changes UI pot value
 function updatePot(pot) {
   document.getElementById("pot").innerHTML = "$" + pot.toString();
+}
+
+function updateStack(stack) {
+  document.getElementById("stack").innerHTML = "$" + stack.toString();
 }
 
 // disables a button(id)
