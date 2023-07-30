@@ -74,6 +74,7 @@ io.on("connection", (socket) => {
    *    enable only current users actions buttons
    */
   socket.on("start-request", () => {
+    console.log(backendPlayers[socket.id].game_position);
     const player = backendPlayers[socket.id];
     if (player.game_position == 0) {
       player.first_to_act = true;
@@ -123,11 +124,12 @@ io.on("connection", (socket) => {
       }
       curr_raise = 0;
 
+      const add = raise - player.stake;
       player.first_to_act = true;
-      player.stack -= raise;
+      player.stack = player.stack - add;
       player.stake = raise;
 
-      pot += parseInt(raise);
+      pot += parseInt(add);
       curr_raise = raise;
 
       for (const id in backendPlayers) {
@@ -227,10 +229,18 @@ io.on("connection", (socket) => {
       }
     }
   });
-  // socket.on("disconnect", (reason) => {
-  //   console.log(reason);
-  //   delete backendPlayers[socket.id];
-  // });
+  socket.on("disconnect", (reason) => {
+    console.log(reason);
+    const position = backendPlayers[socket.id].game_position;
+    for (const id in backendPlayers) {
+      const player = backendPlayers[id];
+      if (player.game_position > position) {
+        player.game_position--;
+      }
+    }
+    game_position--;
+    delete backendPlayers[socket.id];
+  });
 });
 
 const port = 5500;
@@ -242,6 +252,8 @@ app.get("/", (req, res) => {
 });
 
 app.listen(port);
+
+console.log("listening on port " + port);
 
 // populate all 7 cards
 function retrieveCards(numPlayers) {
@@ -282,6 +294,8 @@ function dealNextCard() {
       io.emit("showdown");
   }
 }
+
+function shiftGamePositions() {}
 
 class Player {
   // constructor(x, y, stack, name, image, first, second) {

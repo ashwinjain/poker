@@ -1,7 +1,7 @@
 // initializing frontend client
 const socket = io("http://localhost:3000");
 
-var players = {};
+var frontendPlayers = {};
 // event handler for dealing the user
 socket.on("deal-user-hand", (player) => {
   var cardImages = document.getElementsByClassName("card");
