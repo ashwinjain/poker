@@ -50,42 +50,40 @@ var curr_raise = 0;
 
 // socket on connection
 io.on("connection", (socket) => {
-  io.emit("connected", socket.id);
+  backendPlayers[socket.id] = new Player(
+    socket.id,
+    null,
+    50,
+    game_position++,
+    false,
+    false
+  );
 
+  // FIXME: make this random
   num_players += 1;
   if (num_players == 1) {
     utg = socket.id;
+    backendPlayers[socket.id].first_to_act = true;
+    backendPlayers[socket.id].actor = true;
   }
+
+  io.emit("updatePlayers", backendPlayers);
 
   /**
    * on start
    *    disable everyones actions buttons
    *    enable only current users actions buttons
    */
-  socket.on("start-request", (frontendPlayers) => {
+  socket.on("start-request", () => {
     // console.log(backendPlayers[socket.id].game_position)
-
-    if (frontendPlayers[0].name == socket.id) {
+    if (backendPlayers[socket.id].game_position == 0) {
+      // const game = new Game();
       newGame();
 
-      for (var i = 0; i < frontendPlayers.length; i++) {
+      for (const id in backendPlayers) {
         const user_hand = new Hand(cards.shift(), cards.shift());
-        if (!backendPlayers[frontendPlayers[i].name]) {
-          backendPlayers[frontendPlayers[i].name] = new Player(
-            socket.id,
-            user_hand,
-            50,
-            game_position++,
-            false,
-            false
-          );
-        } else {
-          backendPlayers[frontendPlayers[i].name].hand = user_hand;
-        }
 
-        const firstPlayer = backendPlayers[frontendPlayers[0].name];
-        firstPlayer.first_to_act = true;
-        firstPlayer.actor = true;
+        backendPlayers[id].hand = user_hand;
       }
       io.emit("start-granted");
       for (const id in backendPlayers) {
@@ -245,7 +243,7 @@ io.on("connection", (socket) => {
     // console.log(reason);
     io.emit("disconnected", socket.id);
     if (backendPlayers[socket.id]) {
-      console.log(backendPlayers[socket.id] + " disconnected");
+      console.log(socket.id + " disconnected");
       const position = backendPlayers[socket.id].game_position;
       for (const id in backendPlayers) {
         const player = backendPlayers[id];
@@ -257,6 +255,7 @@ io.on("connection", (socket) => {
       game_position--;
       num_players--;
       delete backendPlayers[socket.id];
+      io.emit("updatePlayers", backendPlayers);
       if (num_players == 0) {
         newGame();
       }
@@ -277,6 +276,7 @@ app.listen(port);
 console.log("listening on port " + port);
 
 // populate all 7 cards
+// FIXME: change to shuffled array of cards
 function retrieveCards(numPlayers) {
   var retval = [];
   var totalcards = numPlayers;
@@ -329,7 +329,31 @@ function newGame() {
   curr_raise = 0;
 }
 
-function shiftGamePositions() {}
+class Game {
+  constructor() {
+    this.cards = retrieveCards(52);
+    this.flop = cards.splice(0, 3);
+    this.turn = cards.shift();
+    this.river = cards.shift();
+    this.pot = 0;
+    this.state = "deal_flop";
+    this.curr_raise = 0;
+    // maybe add the backendplayers here
+  }
+  newGame() {
+    cards = [];
+    cards = retrieveCards(52);
+
+    flop = cards.splice(0, 3);
+
+    turn = cards.shift();
+    river = cards.shift();
+    pot = 0;
+    state = "deal_flop";
+    console.log("resetting state");
+    curr_raise = 0;
+  }
+}
 
 class Player {
   // constructor(x, y, stack, name, image, first, second) {

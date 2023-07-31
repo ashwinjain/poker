@@ -8,10 +8,20 @@
 // initializing frontend client
 const socket = io("http://localhost:3000");
 
-var frontendPlayers = [];
+// new connections only have their one
+var frontendPlayers = {};
 
-socket.on("connected", (id) => {
-  frontendPlayers.push(new Player(id, 50)); // add status
+socket.on("updatePlayers", (backendPlayers) => {
+  for (const id in backendPlayers) {
+    if (!frontendPlayers[id]) {
+      frontendPlayers[id] = new Player(id, backendPlayers[id].stack);
+    }
+  }
+  for (const id in frontendPlayers) {
+    if (!backendPlayers[id]) {
+      delete frontendPlayers[id];
+    }
+  }
 });
 // event handler for dealing the user
 socket.on("deal-user-hand", (player, frontendPlayers) => {
@@ -115,7 +125,7 @@ function startGame() {
   // var cards = retrieveCards(num_players);
   // const totalcards = 2 * num_players + 5;
 
-  socket.emit("start-request", frontendPlayers);
+  socket.emit("start-request");
 }
 
 // check button
