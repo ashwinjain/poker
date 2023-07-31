@@ -32,12 +32,12 @@ const io = require("socket.io")(3000, {
 });
 
 // preloading this game cards
-const cards = retrieveCards(52);
+var cards;
 
-const flop = cards.splice(0, 3);
+var flop;
 
-const turn = cards.shift();
-const river = cards.shift();
+var turn;
+var river;
 
 // state variables
 var pot = 0;
@@ -45,23 +45,12 @@ var state = "deal_flop";
 var backendPlayers = {};
 var num_players = 0;
 var game_position = 0;
-var table_position = 0;
 var utg;
 var curr_raise = 0;
 
 // socket on connection
 io.on("connection", (socket) => {
-  const user_hand = new Hand(cards.shift(), cards.shift());
-  const player = new Player(
-    socket.id,
-    user_hand,
-    50,
-    game_position++,
-    table_position++,
-    false,
-    false
-  );
-  backendPlayers[socket.id] = player;
+  io.emit("connected", socket.id);
 
   num_players += 1;
   if (num_players == 1) {
@@ -73,15 +62,36 @@ io.on("connection", (socket) => {
    *    disable everyones actions buttons
    *    enable only current users actions buttons
    */
-  socket.on("start-request", () => {
-    console.log(backendPlayers[socket.id].game_position);
-    const player = backendPlayers[socket.id];
-    if (player.game_position == 0) {
-      player.first_to_act = true;
-      player.actor = true;
+  socket.on("start-request", (frontendPlayers) => {
+    // console.log(backendPlayers[socket.id].game_position)
+
+    if (frontendPlayers[0].name == socket.id) {
+      newGame();
+
+      for (var i = 0; i < frontendPlayers.length; i++) {
+        const user_hand = new Hand(cards.shift(), cards.shift());
+        if (!backendPlayers[frontendPlayers[i].name]) {
+          backendPlayers[frontendPlayers[i].name] = new Player(
+            socket.id,
+            user_hand,
+            50,
+            game_position++,
+            false,
+            false
+          );
+        } else {
+          backendPlayers[frontendPlayers[i].name].hand = user_hand;
+        }
+
+        const firstPlayer = backendPlayers[frontendPlayers[0].name];
+        firstPlayer.first_to_act = true;
+        firstPlayer.actor = true;
+      }
       io.emit("start-granted");
       for (const id in backendPlayers) {
-        io.to(id).emit("deal-user-hand", backendPlayers[id]);
+        var frontendPlayers = Object.assign({}, backendPlayers);
+        delete frontendPlayers[id];
+        io.to(id).emit("deal-user-hand", backendPlayers[id], frontendPlayers);
       }
       io.to(socket.id).emit("enable-action-buttons");
     }
@@ -90,9 +100,11 @@ io.on("connection", (socket) => {
   socket.on("check-request", () => {
     const player = backendPlayers[socket.id];
     console.log(player.actor);
+    console.log("num_players: " + num_players);
     if (player.actor == true) {
       player.actor = false;
       const next_game_position = player.game_position + 1;
+      console.log("next_game_position: " + next_game_position);
       for (const id in backendPlayers) {
         const curr_player = backendPlayers[id];
         if (curr_player.game_position == next_game_position) {
@@ -230,16 +242,25 @@ io.on("connection", (socket) => {
     }
   });
   socket.on("disconnect", (reason) => {
-    console.log(reason);
-    const position = backendPlayers[socket.id].game_position;
-    for (const id in backendPlayers) {
-      const player = backendPlayers[id];
-      if (player.game_position > position) {
-        player.game_position--;
+    // console.log(reason);
+    io.emit("disconnected", socket.id);
+    if (backendPlayers[socket.id]) {
+      console.log(backendPlayers[socket.id] + " disconnected");
+      const position = backendPlayers[socket.id].game_position;
+      for (const id in backendPlayers) {
+        const player = backendPlayers[id];
+        if (player.game_position > position) {
+          player.game_position--;
+        }
+      }
+
+      game_position--;
+      num_players--;
+      delete backendPlayers[socket.id];
+      if (num_players == 0) {
+        newGame();
       }
     }
-    game_position--;
-    delete backendPlayers[socket.id];
   });
 });
 
@@ -259,7 +280,6 @@ console.log("listening on port " + port);
 function retrieveCards(numPlayers) {
   var retval = [];
   var totalcards = numPlayers;
-  var remainingCards = 11 - totalcards;
 
   var suits = ["s", "c", "d", "h"];
 
@@ -295,25 +315,30 @@ function dealNextCard() {
   }
 }
 
+function newGame() {
+  cards = [];
+  cards = retrieveCards(52);
+
+  flop = cards.splice(0, 3);
+
+  turn = cards.shift();
+  river = cards.shift();
+  pot = 0;
+  state = "deal_flop";
+  console.log("resetting state");
+  curr_raise = 0;
+}
+
 function shiftGamePositions() {}
 
 class Player {
   // constructor(x, y, stack, name, image, first, second) {
-  constructor(
-    name,
-    hand,
-    stack,
-    game_position,
-    table_position,
-    actor,
-    first_to_act
-  ) {
+  constructor(name, hand, stack, game_position, actor, first_to_act) {
     this.name = name;
     this.hand = hand;
     this.stack = stack;
     this.stake = 0;
     this.game_position = game_position;
-    this.table_position = table_position;
     this.actor = actor;
     this.first_to_act = first_to_act;
   }

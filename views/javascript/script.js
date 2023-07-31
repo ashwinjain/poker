@@ -1,25 +1,36 @@
+/**
+ * Frontend players
+ *    name(id)
+ *    table-position
+ *    stack
+ */
+
 // initializing frontend client
 const socket = io("http://localhost:3000");
 
-var frontendPlayers = {};
+var frontendPlayers = [];
+
+socket.on("connected", (id) => {
+  frontendPlayers.push(new Player(id, 50)); // add status
+});
 // event handler for dealing the user
-socket.on("deal-user-hand", (player) => {
+socket.on("deal-user-hand", (player, frontendPlayers) => {
   var cardImages = document.getElementsByClassName("card");
+  console.log(player);
   // for (var i = 0; i < 2; i++) {
   cardImages[0].src = "data/images/cards/z" + player.hand.first + ".png";
   cardImages[1].src = "data/images/cards/z" + player.hand.second + ".png";
   // }
   document.getElementById("friend").innerText = socket.id;
   document.getElementById("stack").innerHTML = "$" + player.stack;
-  console.log(player);
   disableBetButtons();
+  begin();
 });
 
 socket.on("enable-action-buttons", () => {
   enable("check_button");
   enable("raise_button");
   enable("fold_button");
-  console.log("enabled");
 });
 
 // event handler for dealing the flop
@@ -42,11 +53,9 @@ socket.on("deal-river", (river) => {
   card.src = "data/images/cards/z" + river + ".png";
 });
 
-socket.on("start-granted", () => {
-  document.getElementById("user_hand").style.display = "inline-block";
-  document.getElementById("start").style.display = "none";
-  document.getElementById("bet_buttons").style.opacity = 1;
-  document.getElementById("pot").style.opacity = 1;
+socket.on("start-granted", (backendPlayers) => {
+  // add to the frontend players here
+  reset();
 });
 
 socket.on("check-granted", (prev_id, next_id) => {
@@ -86,7 +95,15 @@ socket.on("fold-granted", () => {
 
 socket.on("showdown", () => {
   disableBetButtons();
-  console.log("showdown");
+  document.getElementById("start").style.display = "block";
+});
+
+socket.on("disconnected", (id) => {
+  for (var i = 0; i < frontendPlayers.length; i++) {
+    if (frontendPlayers[i].name == id) {
+      frontendPlayers.splice(i, i + 1);
+    }
+  }
 });
 
 /*
@@ -98,7 +115,7 @@ function startGame() {
   // var cards = retrieveCards(num_players);
   // const totalcards = 2 * num_players + 5;
 
-  socket.emit("start-request");
+  socket.emit("start-request", frontendPlayers);
 }
 
 // check button
@@ -128,19 +145,24 @@ function fold() {
  */
 
 // resets the game
+function begin() {
+  document.getElementById("user_hand").style.display = "inline-block";
+  document.getElementById("start").style.display = "none";
+  document.getElementById("bet_buttons").style.opacity = 1;
+  document.getElementById("pot").style.opacity = 1;
+}
 function reset() {
   // reset all card elements
-  var flops = document.getElementsByClassName("flop");
+  var flops = document.getElementsByClassName("card_flop");
   for (var i = 0; i < 3; i++) {
-    flops[i].style.opacity = "0";
+    flops[i].src = "data/images/cards/card_back.png";
   }
-  document.getElementById("turn").style.opacity = 0;
-  document.getElementById("river").style.opacity = 0;
+  document.getElementById("turn").src = "data/images/cards/card_back.png";
+  document.getElementById("river").src = "data/images/cards/card_back.png";
 
-  var cardImages = document.getElementsByClassName("user_card");
-  for (var i = 0; i < cardImages.length; i++) {
-    cardImages[i].children[0].src = "data/images/cards/card_back.png";
-  }
+  document.getElementById("user_first").src = "data/images/cards/card_back.png";
+  document.getElementById("user_second").src =
+    "data/images/cards/card_back.png";
 
   // reset pot
 
@@ -175,4 +197,12 @@ function disableBetButtons() {
   disable("raise_button");
   disable("fold_button");
   disable("call_button");
+}
+
+class Player {
+  // constructor(x, y, stack, name, image, first, second) {
+  constructor(name, stack) {
+    this.name = name;
+    this.stack = stack;
+  }
 }
