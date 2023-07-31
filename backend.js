@@ -32,22 +32,13 @@ const io = require("socket.io")(3000, {
 });
 
 // preloading this game cards
-var cards;
-
-var flop;
-
-var turn;
-var river;
 
 // state variables
-var pot = 0;
-var state = "deal_flop";
 var backendPlayers = {};
 var num_players = 0;
 var game_position = 0;
 var utg;
-var curr_raise = 0;
-
+var game;
 // socket on connection
 io.on("connection", (socket) => {
   backendPlayers[socket.id] = new Player(
@@ -77,11 +68,10 @@ io.on("connection", (socket) => {
   socket.on("start-request", () => {
     // console.log(backendPlayers[socket.id].game_position)
     if (backendPlayers[socket.id].game_position == 0) {
-      // const game = new Game();
-      newGame();
+      game = new Game();
 
       for (const id in backendPlayers) {
-        const user_hand = new Hand(cards.shift(), cards.shift());
+        const user_hand = new Hand(game.cards.shift(), game.cards.shift());
 
         backendPlayers[id].hand = user_hand;
       }
@@ -112,10 +102,10 @@ io.on("connection", (socket) => {
           break;
         } else if (num_players == next_game_position) {
           backendPlayers[utg].actor = true;
-          console.log(state);
-          dealNextCard(state);
+          console.log(game.state);
+          dealNextCard(game.state);
           io.emit("check-granted", socket.id, id);
-          if (state != "showdown") {
+          if (game.state != "showdown") {
             io.to(utg).emit("enable-action-buttons");
           }
           break;
@@ -127,20 +117,20 @@ io.on("connection", (socket) => {
   socket.on("raise-request", (raise) => {
     const player = backendPlayers[socket.id];
     console.log(player.actor);
-    if (player.actor == true && raise >= curr_raise * 2) {
+    if (player.actor == true && raise >= game.curr_raise * 2) {
       const next_game_position = (player.game_position + 1) % num_players;
       for (const id in backendPlayers) {
         backendPlayers[id].first_to_act = false;
       }
-      curr_raise = 0;
+      game.curr_raise = 0;
 
       const add = raise - player.stake;
       player.first_to_act = true;
       player.stack = player.stack - add;
       player.stake = raise;
 
-      pot += parseInt(add);
-      curr_raise = raise;
+      game.pot += parseInt(add);
+      game.curr_raise = raise;
 
       for (const id in backendPlayers) {
         const curr_player = backendPlayers[id];
@@ -150,10 +140,10 @@ io.on("connection", (socket) => {
         ) {
           curr_player.first_to_act = false;
           backendPlayers[utg].actor = true;
-          console.log(state);
-          dealNextCard(state);
+          console.log(game.state);
+          dealNextCard(game.state);
           io.emit("check-granted", socket.id, id); // change this to a raise grainted event
-          if (state != "showdown") {
+          if (game.state != "showdown") {
             io.to(utg).emit("enable-action-buttons");
           }
           break;
@@ -162,7 +152,7 @@ io.on("connection", (socket) => {
           io.emit(
             "raise-granted",
             socket.id,
-            pot,
+            game.pot,
             backendPlayers[socket.id].stack
           );
           // emit disable check, enable call button
@@ -178,12 +168,12 @@ io.on("connection", (socket) => {
     console.log(player.actor);
     if (player.actor == true) {
       const next_game_position = (player.game_position + 1) % num_players;
-      const match = curr_raise - player.stake;
+      const match = game.curr_raise - player.stake;
       console.log(match);
       player.stack -= match;
 
-      pot += parseInt(match);
-      player.stake = curr_raise;
+      game.pot += parseInt(match);
+      player.stake = game.curr_raise;
 
       for (const id in backendPlayers) {
         const curr_player = backendPlayers[id];
@@ -196,21 +186,22 @@ io.on("connection", (socket) => {
           for (const id in backendPlayers) {
             backendPlayers[id].stake = 0;
           }
-          dealNextCard(state);
+          dealNextCard(game.state);
           io.emit(
             "call-granted",
             socket.id,
-            pot,
+            game.pot,
             backendPlayers[socket.id].stack
           );
-          if (state != "showdown") io.to(utg).emit("enable-action-buttons");
+          if (game.state != "showdown")
+            io.to(utg).emit("enable-action-buttons");
           break;
         } else if (curr_player.game_position == next_game_position) {
           curr_player.actor = true;
           io.emit(
             "call-granted",
             socket.id,
-            pot,
+            game.pot,
             backendPlayers[socket.id].stack
           );
           // emit disable check, enable call button
@@ -222,7 +213,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("fold-request", () => {
-    if (curr_raise != 0) {
+    if (game.curr_raise != 0) {
       const position = backendPlayers[socket.id].game_position;
       backendPlayers[socket.id].game_position = -1;
       num_players--;
@@ -295,63 +286,36 @@ function retrieveCards(numPlayers) {
 }
 
 function dealNextCard() {
-  curr_raise = 0;
-  switch (state) {
+  game.curr_raise = 0;
+  switch (game.state) {
     case "deal_flop":
-      io.emit("deal-flop", flop);
-      state = "deal_turn";
+      io.emit("deal-flop", game.flop);
+      game.state = "deal_turn";
       break;
     case "deal_turn":
-      io.emit("deal-turn", turn);
-      state = "deal_river";
+      io.emit("deal-turn", game.turn);
+      game.state = "deal_river";
       break;
     case "deal_river":
-      io.emit("deal-river", river);
-      state = "final_bet";
+      io.emit("deal-river", game.river);
+      game.state = "final_bet";
       break;
     case "final_bet":
-      state = "showdown";
+      game.state = "showdown";
       io.emit("showdown");
   }
-}
-
-function newGame() {
-  cards = [];
-  cards = retrieveCards(52);
-
-  flop = cards.splice(0, 3);
-
-  turn = cards.shift();
-  river = cards.shift();
-  pot = 0;
-  state = "deal_flop";
-  console.log("resetting state");
-  curr_raise = 0;
 }
 
 class Game {
   constructor() {
     this.cards = retrieveCards(52);
-    this.flop = cards.splice(0, 3);
-    this.turn = cards.shift();
-    this.river = cards.shift();
+    this.flop = this.cards.splice(0, 3);
+    this.turn = this.cards.shift();
+    this.river = this.cards.shift();
     this.pot = 0;
     this.state = "deal_flop";
     this.curr_raise = 0;
     // maybe add the backendplayers here
-  }
-  newGame() {
-    cards = [];
-    cards = retrieveCards(52);
-
-    flop = cards.splice(0, 3);
-
-    turn = cards.shift();
-    river = cards.shift();
-    pot = 0;
-    state = "deal_flop";
-    console.log("resetting state");
-    curr_raise = 0;
   }
 }
 
