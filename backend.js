@@ -66,10 +66,9 @@ io.on("connection", (socket) => {
    *    enable only current users actions buttons
    */
   socket.on("start-request", () => {
-    // console.log(backendPlayers[socket.id].game_position)
-
     if (playerOrder[0] == socket.id) {
-      game = new Game(socket.id);
+      game = new Game(socket.id, playerOrder);
+      console.log(playerOrder);
 
       for (const id in backendPlayers) {
         const user_hand = new Hand(game.cards.shift(), game.cards.shift());
@@ -88,9 +87,9 @@ io.on("connection", (socket) => {
 
   socket.on("check-request", () => {
     const isActor = game.actor == socket.id;
-    console.log(isActor);
+    console.log("isActor: " + isActor);
     if (isActor) {
-      const next_actor = playerOrder[++game.curr_actor];
+      const next_actor = game.playerOrder[++game.curr_actor];
       console.log("next_actor: " + next_actor);
       for (const id in backendPlayers) {
         if (id == next_actor) {
@@ -100,13 +99,13 @@ io.on("connection", (socket) => {
           break;
         } else if (next_actor == undefined) {
           game.curr_actor = 0;
-          game.actor = playerOrder[0];
+          game.actor = game.playerOrder[0];
           // backendPlayers[utg].actor = true;
-          console.log(game.state);
+          // console.log(game.state);
           dealNextCard(game.state);
           io.emit("check-granted", socket.id, id);
           if (game.state != "showdown") {
-            io.to(playerOrder[0]).emit("enable-action-buttons");
+            io.to(game.playerOrder[0]).emit("enable-action-buttons");
           }
           break;
         }
@@ -117,10 +116,10 @@ io.on("connection", (socket) => {
   socket.on("raise-request", (raise) => {
     const player = backendPlayers[socket.id];
     const isActor = game.actor == socket.id;
-    console.log(isActor);
+    console.log("isActor: " + isActor);
     if (isActor && raise >= game.curr_raise * 2) {
       game.curr_actor += 1;
-      const next_actor = playerOrder[game.curr_actor % num_players];
+      const next_actor = game.playerOrder[game.curr_actor % num_players];
       console.log("next_actor: " + next_actor);
       // for (const id in backendPlayers) {
       //   backendPlayers[id].first_to_act = false;
@@ -139,8 +138,8 @@ io.on("connection", (socket) => {
       for (const id in backendPlayers) {
         if (next_actor == id && game.first_to_act == id) {
           game.curr_actor = 0;
-          game.actor = playerOrder[0]; // backendPlayers[utg].actor = true;f
-          game.first_to_act = playerOrder[0]; // curr_player.first_to_act = false;
+          game.actor = game.playerOrder[0]; // backendPlayers[utg].actor = true;f
+          game.first_to_act = game.playerOrder[0]; // curr_player.first_to_act = false;
           console.log(game.state);
           dealNextCard(game.state);
           io.emit("check-granted", socket.id, id); // change this to a raise grainted event
@@ -167,13 +166,12 @@ io.on("connection", (socket) => {
   socket.on("call-request", () => {
     const player = backendPlayers[socket.id];
     const isActor = game.actor == socket.id;
-    console.log(isActor);
+    console.log("isActor: " + isActor);
     if (isActor) {
       game.curr_actor += 1;
-      const next_actor = playerOrder[game.curr_actor % num_players];
+      const next_actor = game.playerOrder[game.curr_actor % num_players];
       console.log("next_actor: " + next_actor);
       const match = game.curr_raise - player.stake;
-      console.log(match);
       player.stack -= match;
 
       game.pot += parseInt(match);
@@ -182,7 +180,7 @@ io.on("connection", (socket) => {
       for (const id in backendPlayers) {
         if (next_actor == id && game.first_to_act == id) {
           game.curr_actor = 0;
-          game.actor = playerOrder[0];
+          game.actor = game.playerOrder[0];
           for (const id in backendPlayers) {
             backendPlayers[id].stake = 0;
           }
@@ -194,7 +192,7 @@ io.on("connection", (socket) => {
             backendPlayers[socket.id].stack
           );
           if (game.state != "showdown")
-            io.to(playerOrder[0]).emit("enable-action-buttons");
+            io.to(game.playerOrder[0]).emit("enable-action-buttons");
           break;
         } else if (next_actor == id) {
           game.actor = id; // curr_player.actor = true;
@@ -214,24 +212,28 @@ io.on("connection", (socket) => {
   });
 
   socket.on("fold-request", () => {
+    const isActor = game.actor == socket.id;
+    console.log("isActor: " + isActor);
+
     if (game.curr_raise != 0) {
-      const position = backendPlayers[socket.id].game_position;
-      backendPlayers[socket.id].game_position = -1;
       num_players--;
+
       io.to(socket.id).emit("fold-granted");
-      for (const id in backendPlayers) {
-        const player = backendPlayers[id];
-        if (player.game_position > position) {
-          player.game_position--;
-          if (player.game_position == position) {
-            io.to(id).emit("switch-check-call");
-          }
+      for (var i = 0; i < game.playerOrder.length; i++) {
+        const id = game.playerOrder[i];
+        if (id == socket.id) {
+          game.playerOrder.splice(i, 1);
+          const next_actor = game.playerOrder[game.curr_actor % num_players];
+          console.log("next_actor: " + next_actor);
+          io.to(next_actor).emit("switch-check-call");
+          game.actor = next_actor;
+          // game.curr_actor += 1;
+          break;
         }
       }
     }
   });
   socket.on("disconnect", (reason) => {
-    // console.log(reason);
     io.emit("disconnected", socket.id);
     if (backendPlayers[socket.id]) {
       console.log(socket.id + " disconnected");
@@ -304,7 +306,7 @@ function dealNextCard() {
 }
 
 class Game {
-  constructor(id) {
+  constructor(id, playerOrder) {
     this.cards = retrieveCards(52);
     this.flop = this.cards.splice(0, 3);
     this.turn = this.cards.shift();
@@ -315,6 +317,7 @@ class Game {
     this.curr_actor = 0;
     this.actor = id;
     this.first_to_act = id;
+    this.playerOrder = [...playerOrder];
     // maybe add the backendplayers here
     console.log("new game");
   }
