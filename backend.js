@@ -41,14 +41,7 @@ var playerOrder = [];
 
 // socket on connection
 io.on("connection", (socket) => {
-  backendPlayers[socket.id] = new Player(
-    socket.id,
-    null,
-    50,
-    game_position++,
-    false,
-    false
-  );
+  backendPlayers[socket.id] = new Player(socket.id, null, 50);
 
   playerOrder.push(socket.id);
 
@@ -65,9 +58,20 @@ io.on("connection", (socket) => {
    *    disable everyones actions buttons
    *    enable only current users actions buttons
    */
+
+  socket.on("createGame", (code) => {
+    console.log(code);
+
+    // create a room with that id
+    // as players join, update the room -- treat this like the the single page 
+  });
   socket.on("start-request", () => {
     if (playerOrder[0] == socket.id) {
+      console.log(playerOrder);
       game = new Game(socket.id, playerOrder);
+      console.log(playerOrder);
+      playerOrder.push(playerOrder.shift());
+
       console.log(playerOrder);
 
       for (const id in backendPlayers) {
@@ -115,19 +119,18 @@ io.on("connection", (socket) => {
 
   socket.on("raise-request", (raise) => {
     const player = backendPlayers[socket.id];
-    const isActor = game.actor == socket.id;
     console.log("isActor: " + isActor);
-    if (isActor && raise >= game.curr_raise * 2) {
+    if (
+      isActor &&
+      raise >= game.curr_raise * 2 &&
+      backendPlayers[socket.id].stack >= raise
+    ) {
       game.curr_actor += 1;
       const next_actor = game.playerOrder[game.curr_actor % num_players];
       console.log("next_actor: " + next_actor);
-      // for (const id in backendPlayers) {
-      //   backendPlayers[id].first_to_act = false;
-      // }
       game.curr_raise = 0;
 
       const add = raise - player.stake;
-      // player.first_to_act = true;
       game.first_to_act = socket.id;
       player.stack -= add;
       player.stake = raise;
@@ -258,7 +261,7 @@ app.use(express.static(__dirname + "/views"));
 
 app.set("view engine", "ejs");
 app.get("/", (req, res) => {
-  res.render("index");
+  res.render("start");
 });
 
 app.listen(port);
@@ -325,16 +328,11 @@ class Game {
 
 class Player {
   // constructor(x, y, stack, name, image, first, second) {
-  constructor(name, hand, stack, game_position, actor, first_to_act) {
+  constructor(name, hand, stack) {
     this.name = name;
     this.hand = hand;
     this.stack = stack;
     this.stake = 0;
-
-    // get rid of these
-    this.game_position = game_position;
-    this.actor = actor;
-    this.first_to_act = first_to_act;
   }
 }
 

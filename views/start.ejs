@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <!--meta data-->
+    <meta charset="UTF-8" />
+    <meta name="description" content="Poker" />
+    <meta name="keywords" content="HTML, CSS, JavaScript" />
+    <meta name="author" content="Ashwin Jain" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0 maximum-scale=1, user-scalable=no"
+    />
+
+    <!--Linking stylesheet-->
+    <link rel="stylesheet" href="start.css" />
+
+    <!--Linking javascript-->
+    <script defer src="javascript/start.js"></script>
+    <script defer src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script
+      src="https://kit.fontawesome.com/e6921743c9.js"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+    <title>Texas Hold 'em Poker</title>
+    <h1 class="head_title">Texas Hold 'em Poker</h1>
+  </head>
+  <body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.js"></script>
+
+    <div class="start_div">
+      <button class="start_buttons" id="create" onclick="createGame()">
+        Create
+      </button>
+      <button class="start_buttons" id="join" onclick="joinGame()">Join</button>
+      <input type="text" id="code" required />
+    </div>
+  </body>
+</html>
