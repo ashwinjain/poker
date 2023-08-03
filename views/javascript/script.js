@@ -8,6 +8,8 @@
 // initializing frontend client
 const socket = io("http://localhost:3000");
 
+console.log(locals.room);
+
 // new connections only have their one
 var frontendPlayers = {};
 

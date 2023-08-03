@@ -13,10 +13,3 @@ form.addEventListener("submit", (e) => {
   }
   form.submit();
 });
-
-class Room {
-  constructor(name) {
-    this.name = name;
-    this.players = [];
-  }
-}

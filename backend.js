@@ -39,6 +39,7 @@ var utg;
 var game;
 var playerOrder = [];
 var rooms = {};
+var room;
 
 const port = 5500;
 app.use(express.static(__dirname + "/views"));
@@ -51,6 +52,7 @@ app.get("/", (req, res) => {
 
 app.post("/rooms", (req, res) => {
   res.render("index", { room: req.body.code });
+  room = req.body.code;
 });
 
 // app.post("/rooms", (req, res) => {
@@ -62,10 +64,18 @@ app.listen(port);
 console.log("listening on port " + port);
 
 io.on("connection", (socket) => {
-  // socket.join(r);
-  // console.log(socket.id + " connected to room: " + req.body.code);
-  // console.log(Object.keys(socket.rooms).filter((item) => item != socket.id));
+  room = "";
+
+  if (!rooms[socket.id]) {
+    rooms[socket.id] = new Room(room, new Player(socket.id, null, 50));
+  } else {
+    rooms[socket.id].players.push(new Player(socket.id, null, 50));
+  }
+  socket.join(room);
+
+  console.log(socket.id + " connected to room: " + room);
   backendPlayers[socket.id] = new Player(socket.id, null, 50);
+  console.log(room);
 
   playerOrder.push(socket.id);
 
@@ -309,6 +319,13 @@ function dealNextCard() {
     case "final_bet":
       game.state = "showdown";
       io.emit("showdown");
+  }
+}
+
+class Room {
+  constructor(name, player) {
+    this.name = name;
+    this.players = [player];
   }
 }
 
