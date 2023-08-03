@@ -31,11 +31,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.js"></script>
 
     <div class="start_div">
-      <button class="start_buttons" id="create" onclick="createGame()">
-        Create
-      </button>
-      <button class="start_buttons" id="join" onclick="joinGame()">Join</button>
-      <input type="text" id="code" required />
+      <form method="POST" action="/rooms" id="room_form" name="room_form">
+        <button type="submit" class="start_buttons">Create</button>
+        <button type="submit" class="start_buttons">Join</button>
+        <input type="text" name="code" id="code" />
+      </form>
     </div>
   </body>
 </html>

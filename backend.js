@@ -38,9 +38,33 @@ var game_position = 0;
 var utg;
 var game;
 var playerOrder = [];
+var rooms = {};
 
-// socket on connection
+const port = 5500;
+app.use(express.static(__dirname + "/views"));
+app.use(express.urlencoded({ extended: true }));
+
+app.set("view engine", "ejs");
+app.get("/", (req, res) => {
+  res.render("start");
+});
+
+app.post("/rooms", (req, res) => {
+  res.render("index", { room: req.body.code });
+});
+
+// app.post("/rooms", (req, res) => {
+//   res.render("index");
+// });
+
+app.listen(port);
+
+console.log("listening on port " + port);
+
 io.on("connection", (socket) => {
+  // socket.join(r);
+  // console.log(socket.id + " connected to room: " + req.body.code);
+  // console.log(Object.keys(socket.rooms).filter((item) => item != socket.id));
   backendPlayers[socket.id] = new Player(socket.id, null, 50);
 
   playerOrder.push(socket.id);
@@ -59,20 +83,10 @@ io.on("connection", (socket) => {
    *    enable only current users actions buttons
    */
 
-  socket.on("createGame", (code) => {
-    console.log(code);
-
-    // create a room with that id
-    // as players join, update the room -- treat this like the the single page 
-  });
   socket.on("start-request", () => {
     if (playerOrder[0] == socket.id) {
-      console.log(playerOrder);
       game = new Game(socket.id, playerOrder);
-      console.log(playerOrder);
       playerOrder.push(playerOrder.shift());
-
-      console.log(playerOrder);
 
       for (const id in backendPlayers) {
         const user_hand = new Hand(game.cards.shift(), game.cards.shift());
@@ -119,6 +133,8 @@ io.on("connection", (socket) => {
 
   socket.on("raise-request", (raise) => {
     const player = backendPlayers[socket.id];
+    const isActor = game.actor == socket.id;
+
     console.log("isActor: " + isActor);
     if (
       isActor &&
@@ -255,18 +271,6 @@ io.on("connection", (socket) => {
     }
   });
 });
-
-const port = 5500;
-app.use(express.static(__dirname + "/views"));
-
-app.set("view engine", "ejs");
-app.get("/", (req, res) => {
-  res.render("start");
-});
-
-app.listen(port);
-
-console.log("listening on port " + port);
 
 // populate all 7 cards
 // FIXME: change to shuffled array of cards
