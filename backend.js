@@ -33,7 +33,6 @@ const io = require("socket.io")(3000, {
 
 // state variables
 var backendPlayers = {};
-var game_position = 0;
 var rooms = {};
 var roomName;
 var waitingList = [];
@@ -65,7 +64,7 @@ app.listen(port);
 console.log("listening on port " + port);
 
 io.on("connection", (socket) => {
-  backendPlayers[socket.id] = new Player(socket.id, {}, 50, roomName);
+  backendPlayers[socket.id] = new Player(socket.id, 50, roomName);
 
   socket.join(roomName);
   console.log(roomName);
@@ -114,7 +113,7 @@ io.on("connection", (socket) => {
       game.startGame();
 
       io.to(roomName).emit("start-granted");
-      for (var i = 0; i < playerOrder.length; i++) {
+      for (var i = 0; i < game.num_players; i++) {
         const id = playerOrder[i];
         const user_hand = new Hand(game.cards.shift(), game.cards.shift());
         backendPlayers[id].hand = user_hand;
@@ -133,14 +132,12 @@ io.on("connection", (socket) => {
     const roomName = player.room;
     const game = rooms[roomName];
     const playerOrder = game.playerOrder;
-    const num_players = playerOrder.length;
-
+    const num_players = game.num_players;
     const isActor = game.actor == socket.id;
     console.log("isActor: " + isActor);
     console.log(game.state);
     if (isActor) {
-      // game.curr_actor += 1;
-      game.curr_actor++;
+      game.curr_actor += 1;
       const nextIndex = game.curr_actor % num_players;
       const next_actor = playerOrder[nextIndex];
       console.log("next_actor: " + next_actor);
@@ -172,8 +169,7 @@ io.on("connection", (socket) => {
     const roomName = player.room;
     const game = rooms[roomName];
     const playerOrder = game.playerOrder;
-    const num_players = playerOrder.length;
-
+    const num_players = game.num_players;
     const isActor = game.actor == socket.id;
     console.log("isActor: " + isActor);
     console.log(game.state);
@@ -182,8 +178,7 @@ io.on("connection", (socket) => {
       raise >= game.curr_raise * 2 &&
       backendPlayers[socket.id].stack >= raise
     ) {
-      game.curr_actor += 1;
-      const next_actor = game.playerOrder[game.curr_actor % num_players];
+      const next_actor = game.playerOrder[++game.curr_actor % num_players];
       console.log("next_actor: " + next_actor);
       game.curr_raise = 0;
 
@@ -229,15 +224,13 @@ io.on("connection", (socket) => {
     const roomName = player.room;
     const game = rooms[roomName];
     const playerOrder = game.playerOrder;
-    const num_players = playerOrder.length;
-
+    const num_players = game.num_players;
     const isActor = game.actor == socket.id;
     console.log("isActor: " + isActor);
     console.log(game.state);
 
     if (isActor) {
-      game.curr_actor += 1;
-      const next_actor = game.playerOrder[game.curr_actor % num_players];
+      const next_actor = game.playerOrder[++game.curr_actor % num_players];
       console.log("next_actor: " + next_actor);
       const match = game.curr_raise - player.stake;
       player.stack -= match;
@@ -245,7 +238,7 @@ io.on("connection", (socket) => {
       game.pot += parseInt(match);
       player.stake = game.curr_raise;
 
-      for (var i = 0; i < playerOrder.length; i++) {
+      for (var i = 0; i < game.num_players; i++) {
         const id = playerOrder[i];
         if (next_actor == id && game.first_to_act == id) {
           game.curr_actor = 0;
@@ -285,25 +278,25 @@ io.on("connection", (socket) => {
     const roomName = player.room;
     const game = rooms[roomName];
     const playerOrder = game.playerOrder;
-    const num_players = playerOrder.length;
-
+    var num_players = game.num_players;
     const isActor = game.actor == socket.id;
     console.log("isActor: " + isActor);
 
     if (game.curr_raise != 0) {
-      io.to(socket.id).emit("fold-granted");
-      for (var i = 0; i < game.playerOrder.length; i++) {
+      const next_actor = playerOrder[(game.curr_actor + 1) % num_players];
+      for (var i = 0; i < num_players; i++) {
         const id = game.playerOrder[i];
         if (id == socket.id) {
-          game.playerOrder.splice(i, 1);
-          const next_actor = game.playerOrder[game.curr_actor % num_players];
-          console.log("next_actor: " + next_actor);
+          game.num_players--;
+          playerOrder.splice(i, 1);
+          game.folded_players[id] = i;
           io.to(next_actor).emit("switch-check-call");
-          game.actor = next_actor;
-          // game.curr_actor += 1;
           break;
         }
       }
+      game.actor = next_actor;
+      console.log("next_actor: " + next_actor);
+      io.to(socket.id).emit("fold-granted");
     }
   });
   socket.on("disconnect", (reason) => {
@@ -385,8 +378,11 @@ class Game {
   }
   startGame() {
     // this.playerOrder.push(this.playerOrder.shift());
+
+    for (const id in this.folded_players) {
+      this.playerOrder.splice(this.folded_players[id], 0, id);
+    }
     this.first_to_act = this.playerOrder[0];
-    this.actor = this.first_to_act;
     this.cards = retrieveCards(52);
     this.flop = this.cards.splice(0, 3);
     this.turn = this.cards.shift();
@@ -398,12 +394,14 @@ class Game {
     this.actor = this.playerOrder[0];
     this.first_to_act = this.actor;
     this.utg = this.actor;
+    this.num_players = this.playerOrder.length;
+    this.folded_players = {};
   }
 }
 
 class Player {
   // constructor(x, y, stack, name, image, first, second) {
-  constructor(name, hand, stack, room) {
+  constructor(name, stack, room) {
     this.name = name;
     this.hand = {};
     this.stack = stack;
