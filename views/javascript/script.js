@@ -8,8 +8,6 @@
 // initializing frontend client
 const socket = io("http://localhost:3000");
 
-console.log(locals.room);
-
 // new connections only have their one
 var frontendPlayers = {};
 
@@ -26,9 +24,9 @@ socket.on("updatePlayers", (backendPlayers) => {
   }
 });
 // event handler for dealing the user
-socket.on("deal-user-hand", (player, frontendPlayers) => {
+socket.on("deal-user-hand", (player) => {
   var cardImages = document.getElementsByClassName("card");
-  console.log(player);
+  // console.log("data/images/cards/z" + player.hand.first + ".png);
   // for (var i = 0; i < 2; i++) {
   cardImages[0].src = "data/images/cards/z" + player.hand.first + ".png";
   cardImages[1].src = "data/images/cards/z" + player.hand.second + ".png";
@@ -67,6 +65,7 @@ socket.on("deal-river", (river) => {
 
 socket.on("start-granted", (backendPlayers) => {
   // add to the frontend players here
+  console.log("start-granted")
   reset();
 });
 
