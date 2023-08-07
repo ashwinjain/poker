@@ -11,10 +11,19 @@ const socket = io("http://localhost:3000");
 // new connections only have their one
 var frontendPlayers = {};
 
-socket.on("updatePlayers", (backendPlayers) => {
+socket.on("updatePlayers", (backendPlayers, playerOrder) => {
+  // const div = document.getElementsByClassName("opp_info");
+  // const name = div[0].firstElementChild;
+  // const stack = name.nextElementSibling;
+
+  // console.log(name.firstElementChild.textContent)
+
   for (const id in backendPlayers) {
     if (!frontendPlayers[id]) {
-      frontendPlayers[id] = new Player(id, backendPlayers[id].stack);
+      frontendPlayers[id] = new Player(
+        backendPlayers[id].username,
+        backendPlayers[id].stack
+      );
     }
   }
   for (const id in frontendPlayers) {
@@ -22,6 +31,8 @@ socket.on("updatePlayers", (backendPlayers) => {
       delete frontendPlayers[id];
     }
   }
+
+  updateOpponents(socket.id, playerOrder);
 });
 // event handler for dealing the user
 socket.on("deal-user-hand", (player) => {
@@ -31,7 +42,6 @@ socket.on("deal-user-hand", (player) => {
   cardImages[0].src = "data/images/cards/z" + player.hand.first + ".png";
   cardImages[1].src = "data/images/cards/z" + player.hand.second + ".png";
   // }
-  document.getElementById("friend").innerText = socket.id;
   document.getElementById("stack").innerHTML = "$" + player.stack;
   disableBetButtons();
   begin();
@@ -109,12 +119,8 @@ socket.on("showdown", () => {
   document.getElementById("start").style.display = "block";
 });
 
-socket.on("disconnected", (id) => {
-  for (var i = 0; i < frontendPlayers.length; i++) {
-    if (frontendPlayers[i].name == id) {
-      frontendPlayers.splice(i, i + 1);
-    }
-  }
+socket.on("disconnected", () => {
+  delete frontendPlayers[socket.id];
 });
 
 /*
@@ -181,6 +187,19 @@ function reset() {
   document.getElementById("start").style.display = "block"; // reset start button
 }
 
+// updates opponent UI
+function updateOpponents(id, playerOrder) {
+  for (var i = 0; i < playerOrder.length; i++) {
+    if (id != playerOrder[i]) {
+      const div = document.getElementsByClassName("opp_info")[i];
+      const name = div.firstElementChild.firstElementChild;
+      name.textContent = frontendPlayers[playerOrder[i]].username;
+      const stack = div.lastElementChild.firstElementChild;
+      stack.textContent = frontendPlayers[playerOrder[i]].stack;
+    }
+  }
+}
+
 // changes UI pot value
 function updatePot(pot) {
   document.getElementById("pot").innerHTML = "$" + pot.toString();
@@ -213,8 +232,8 @@ function disableBetButtons() {
 
 class Player {
   // constructor(x, y, stack, name, image, first, second) {
-  constructor(name, stack) {
-    this.name = name;
+  constructor(username, stack) {
+    this.username = username;
     this.stack = stack;
   }
 }

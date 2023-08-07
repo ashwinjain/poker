@@ -83,10 +83,119 @@
           alt="card_back"
         />
       </div>
+
+      <div class="opponent" id="player1" style="top: 0%; left: 0%">
+        <div class="opp_hand">
+          <img
+            class="opp_card"
+            src="data/images/cards/card_back.png"
+            alt="card_back"
+          />
+          <img
+            class="opp_card"
+            src="data/images/cards/card_back.png"
+            alt="card_back"
+          />
+        </div>
+        <div class="opp_info" style="position: relative; display: inline-block">
+          <div class="name"><p style="color: green">Player 1</p></div>
+          <div class="stack"><p style="color: green">$0</p></div>
+        </div>
+      </div>
+      <div class="opponent" id="player2" style="top: 43%; left: 0%">
+        <div class="opp_hand">
+          <img
+            class="opp_card"
+            src="data/images/cards/card_back.png"
+            alt="card_back"
+          />
+          <img
+            class="opp_card"
+            src="data/images/cards/card_back.png"
+            alt="card_back"
+          />
+        </div>
+        <div class="opp_info" style="position: relative; display: inline-block">
+          <div class="name"><p style="color: green">Player 2</p></div>
+          <div class="stack"><p style="color: green">$0</p></div>
+        </div>
+      </div>
+      <div class="opponent" id="player3" style="bottom: 0%; left: 0%">
+        <div class="opp_hand">
+          <img
+            class="opp_card"
+            src="data/images/cards/card_back.png"
+            alt="card_back"
+          />
+          <img
+            class="opp_card"
+            src="data/images/cards/card_back.png"
+            alt="card_back"
+          />
+        </div>
+        <div class="opp_info" style="position: relative; display: inline-block">
+          <div class="name"><p style="color: green">Player 3</p></div>
+          <div class="stack"><p style="color: green">$0</p></div>
+        </div>
+      </div>
+      <div class="opponent" id="player4" style="top: 0%; right: 0%">
+        <div class="opp_hand">
+          <img
+            class="opp_card"
+            src="data/images/cards/card_back.png"
+            alt="card_back"
+          />
+          <img
+            class="opp_card"
+            src="data/images/cards/card_back.png"
+            alt="card_back"
+          />
+        </div>
+        <div class="opp_info" style="position: relative; display: inline-block">
+          <div class="name"><p style="color: green">Player 4</p></div>
+          <div class="stack"><p style="color: green">$0</p></div>
+        </div>
+      </div>
+      <div class="opponent" id="player5" style="top: 43%; right: 0%">
+        <div class="opp_hand">
+          <img
+            class="opp_card"
+            src="data/images/cards/card_back.png"
+            alt="card_back"
+          />
+          <img
+            class="opp_card"
+            src="data/images/cards/card_back.png"
+            alt="card_back"
+          />
+        </div>
+        <div class="opp_info" style="position: relative; display: inline-block">
+          <div class="name"><p style="color: green">Player 5</p></div>
+          <div class="stack"><p style="color: green">$0</p></div>
+        </div>
+      </div>
+      <div class="opponent" id="player5" style="bottom: 0%; right: 0%">
+        <div class="opp_hand">
+          <img
+            class="opp_card"
+            src="data/images/cards/card_back.png"
+            alt="card_back"
+          />
+          <img
+            class="opp_card"
+            src="data/images/cards/card_back.png"
+            alt="card_back"
+          />
+        </div>
+        <div class="opp_info" style="position: relative; display: inline-block">
+          <div class="name"><p style="color: green">Player 6</p></div>
+          <div class="stack"><p style="color: green">$0</p></div>
+        </div>
+      </div>
     </div>
 
     <!-- Other players -->
-    <p id="friend" style="color: brown"><%= locals.roomName %></p>
+    <p id="player_name" style="color: brown"><%= locals.username %></p>
 
     <div class="actions">
       <div id="bet_buttons">
@@ -107,18 +216,6 @@
           </button>
           <input type="number" id="raise_amount" required />
         </div>
-        <!-- <div>
-          <form id="raise_form">
-            <div class="raise">
-              
-
-              BUTTON HERE
-
-            </div>
-            <div class="raise">
-            </div>
-          </form>
-        </div> -->
         <button class="action_button" id="fold_button" onclick="fold()">
           Fold
         </button>

@@ -35,6 +35,7 @@ const io = require("socket.io")(3000, {
 var backendPlayers = {};
 var rooms = {};
 var roomName;
+var username;
 var waitingList = [];
 
 const port = 5500;
@@ -51,8 +52,9 @@ app.get("/test", (req, res) => {
 });
 
 app.post("/rooms", (req, res) => {
-  res.render("index", { roomName: req.body.code });
+  res.render("index", { roomName: req.body.code, username: req.body.name });
   roomName = req.body.code;
+  username = req.body.name;
 });
 
 // app.post("/rooms", (req, res) => {
@@ -64,7 +66,7 @@ app.listen(port);
 console.log("listening on port " + port);
 
 io.on("connection", (socket) => {
-  backendPlayers[socket.id] = new Player(socket.id, 50, roomName);
+  backendPlayers[socket.id] = new Player(socket.id, 50, roomName, username);
 
   socket.join(roomName);
   if (!rooms[roomName]) {
@@ -82,11 +84,16 @@ io.on("connection", (socket) => {
     console.log(socket.id + " connected to room: " + roomName);
   }
 
-  io.to(roomName).emit("updatePlayers", backendPlayers);
+  io.to(roomName).emit(
+    "updatePlayers",
+    backendPlayers,
+    rooms[roomName].playerOrder
+  );
 
   // FIXME: make this random
 
   roomName = "";
+  username = "";
 
   /**
    * on start
@@ -299,17 +306,20 @@ io.on("connection", (socket) => {
     }
   });
   socket.on("disconnect", (reason) => {
-    io.emit("disconnected", socket.id);
+    io.to(socket.id).emit("disconnected");
     if (backendPlayers[socket.id]) {
       console.log(socket.id + " disconnected");
-      const position = backendPlayers[socket.id].game_position;
-      for (const id in backendPlayers) {
-        const player = backendPlayers[id];
-        if (player.game_position > position) {
-          player.game_position--;
+      const roomName = backendPlayers[socket.id].room;
+      const game = rooms[roomName];
+      if (game.state == "showdown") {
+        game.updatePlayers(socket.id);
+        if (game.num_players == 0) {
+          delete rooms[roomName];
+          console.log(roomName + " destroyed :(");
         }
       }
 
+      // if (rooms[room])
       delete backendPlayers[socket.id];
       io.emit("updatePlayers", backendPlayers);
     }
@@ -382,16 +392,22 @@ class Game {
     this.utg = this.actor;
     this.num_players = this.playerOrder.length;
   }
+
+  updatePlayers(id) {
+    this.playerOrder.splice(this.playerOrder.at(id), 1);
+    this.num_players--;
+  }
 }
 
 class Player {
   // constructor(x, y, stack, name, image, first, second) {
-  constructor(name, stack, room) {
+  constructor(name, stack, room, username) {
     this.name = name;
     this.hand = {};
     this.stack = stack;
     this.stake = 0;
     this.room = room;
+    this.username = username;
   }
 }
 

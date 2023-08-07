@@ -193,6 +193,21 @@ body {
   z-index: -1;
 }
 
+.opponent {
+  position: absolute;
+  background-color: #441111;
+}
+
+.opp_hand {
+  position: relative;
+  display: inline-block;
+}
+
+.opp_card {
+  display: inline-block;
+  width: 43.75px;
+  height: 62.5px;
+}
 /* div {
   border: solid;
   border-color: white;
