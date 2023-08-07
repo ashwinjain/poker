@@ -65,7 +65,7 @@ socket.on("deal-river", (river) => {
 
 socket.on("start-granted", (backendPlayers) => {
   // add to the frontend players here
-  console.log("start-granted")
+  console.log("start-granted");
   reset();
 });
 
@@ -176,6 +176,7 @@ function reset() {
     "data/images/cards/card_back.png";
 
   // reset pot
+  document.getElementById("pot").innerHTML = "$0";
 
   document.getElementById("start").style.display = "block"; // reset start button
 }
