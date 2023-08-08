@@ -276,9 +276,6 @@ io.on("connection", (socket) => {
     const player = backendPlayers[socket.id];
     const roomName = player.room;
     const game = rooms[roomName];
-    const currentOrder = game.currentOrder;
-    var num_players = game.num_players;
-    const isActor = game.actor == socket.id;
 
     if (game.curr_raise != 0) {
       const next_actor =
@@ -306,9 +303,9 @@ io.on("connection", (socket) => {
     }
   });
   socket.on("disconnect", (reason) => {
-    io.to(socket.id).emit("disconnected");
+    // if the game is still going on, fold the player
+    // else,
     if (backendPlayers[socket.id]) {
-      console.log(socket.id + " disconnected");
       const roomName = backendPlayers[socket.id].room;
       const game = rooms[roomName];
       if (game.state == "showdown") {
@@ -321,7 +318,10 @@ io.on("connection", (socket) => {
 
       // if (rooms[room])
       delete backendPlayers[socket.id];
+      io.to(socket.id).emit("disconnected");
+
       io.emit("updatePlayers", backendPlayers);
+      console.log(socket.id + " disconnected");
     }
   });
 });

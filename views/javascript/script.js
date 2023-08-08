@@ -189,13 +189,35 @@ function reset() {
 
 // updates opponent UI
 function updateOpponents(id, playerOrder) {
-  for (var i = 0; i < playerOrder.length; i++) {
-    if (id != playerOrder[i]) {
+  // playerOrder = [ids]
+  // if you are 0 -> deal from p6, p5, p4 etc...
+  // if you are 1 -> deal from p1, p6, p5 etc...
+  // if you are 2 -> deal from p2, p1, p6 etc...
+  // if you are 3 -> deal from p3, p2, p1 etc...
+
+  const position = playerOrder.indexOf(id);
+
+  playerOrder.splice(position, 1);
+
+  if (position == 0) {
+    for (var i = 5; i > 5 - playerOrder.length; i--) {
+      // starts at i=0, need to go up to len
       const div = document.getElementsByClassName("opp_info")[i];
       const name = div.firstElementChild.firstElementChild;
-      name.textContent = frontendPlayers[playerOrder[i]].username;
+      name.textContent = frontendPlayers[playerOrder[5 - i]].username;
       const stack = div.lastElementChild.firstElementChild;
-      stack.textContent = frontendPlayers[playerOrder[i]].stack;
+      stack.textContent = frontendPlayers[playerOrder[5 - i]].stack;
+    }
+  } else if (position == 1) {
+    // 0, 5
+    for (var i = (5 + position) % 6; i > 5 - playerOrder.length + position; ) {
+      // starts at i=0, need to go up to len
+      const div = document.getElementsByClassName("opp_info")[(i + 1) % 5];
+      const name = div.firstElementChild.firstElementChild;
+      name.textContent = frontendPlayers[playerOrder[5 - i]].username;
+      const stack = div.lastElementChild.firstElementChild;
+      stack.textContent = frontendPlayers[playerOrder[5 - i]].stack;
+      i = (i + 5) % 6;
     }
   }
 }
