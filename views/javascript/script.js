@@ -195,30 +195,25 @@ function updateOpponents(id, playerOrder) {
   // if you are 2 -> deal from p2, p1, p6 etc...
   // if you are 3 -> deal from p3, p2, p1 etc...
 
-  const position = playerOrder.indexOf(id);
+  console.log(playerOrder);
 
-  playerOrder.splice(position, 1);
+  const position = playerOrder.indexOf(id) + 1;
 
-  if (position == 0) {
-    for (var i = 5; i > 5 - playerOrder.length; i--) {
-      // starts at i=0, need to go up to len
-      const div = document.getElementsByClassName("opp_info")[i];
-      const name = div.firstElementChild.firstElementChild;
-      name.textContent = frontendPlayers[playerOrder[5 - i]].username;
-      const stack = div.lastElementChild.firstElementChild;
-      stack.textContent = frontendPlayers[playerOrder[5 - i]].stack;
-    }
-  } else if (position == 1) {
-    // 0, 5
-    for (var i = (5 + position) % 6; i > 5 - playerOrder.length + position; ) {
-      // starts at i=0, need to go up to len
-      const div = document.getElementsByClassName("opp_info")[(i + 1) % 5];
-      const name = div.firstElementChild.firstElementChild;
-      name.textContent = frontendPlayers[playerOrder[5 - i]].username;
-      const stack = div.lastElementChild.firstElementChild;
-      stack.textContent = frontendPlayers[playerOrder[5 - i]].stack;
-      i = (i + 5) % 6;
-    }
+  var counter = 0;
+
+  const numOpps = playerOrder.length - 1;
+
+  const oppInfo = document.getElementsByClassName("opp_info");
+
+  while (counter < numOpps) {
+    const thisOpp = oppInfo[counter];
+    const oppPosition = (counter + position) % (numOpps + 1);
+
+    const name = thisOpp.firstElementChild.firstElementChild;
+    name.textContent = frontendPlayers[playerOrder[oppPosition]].username;
+    const stack = thisOpp.lastElementChild.firstElementChild;
+    stack.textContent = frontendPlayers[playerOrder[oppPosition]].stack;
+    counter++;
   }
 }
 
