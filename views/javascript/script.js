@@ -6,6 +6,12 @@
  */
 
 // initializing frontend client
+
+window.greet = function greet(name, element) {
+  console.log("Hi, " + name);
+  element.$server.greet();
+};
+
 const socket = io("http://localhost:3000");
 
 // new connections only have their one
@@ -204,6 +210,7 @@ function updateOpponents(id, playerOrder) {
   const numOpps = playerOrder.length - 1;
 
   const oppInfo = document.getElementsByClassName("opp_info");
+  const oppDiv = document.getElementsByClassName("opponent");
 
   while (counter < numOpps) {
     const thisOpp = oppInfo[counter];
@@ -213,6 +220,7 @@ function updateOpponents(id, playerOrder) {
     name.textContent = frontendPlayers[playerOrder[oppPosition]].username;
     const stack = thisOpp.lastElementChild.firstElementChild;
     stack.textContent = frontendPlayers[playerOrder[oppPosition]].stack;
+    oppDiv[counter].style.opacity = 1;
     counter++;
   }
 }

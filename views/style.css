@@ -196,6 +196,7 @@ body {
 .opponent {
   position: absolute;
   background-color: #441111;
+  opacity: 0;
 }
 
 .opp_hand {

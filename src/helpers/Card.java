@@ -1,19 +1,15 @@
 package helpers;
 
-
 public class Card {
-
 
     private int mValue;
 
     private Suit mSuit;
 
-
     public enum Suit {
         CLUBS, DIAMONDS, HEARTS, SPADES, NA
 
     }
-
 
     public Card(int value, Suit suit) {
 
@@ -23,6 +19,13 @@ public class Card {
 
     }
 
+    public Card() {
+
+    }
+
+    public void test() {
+        System.out.println("testing");
+    }
 
     public int getValue() {
 
@@ -30,20 +33,17 @@ public class Card {
 
     }
 
-
     public void setValue(int inValue) {
 
         mValue = inValue;
 
     }
 
-
     public Suit getSuit() {
 
         return mSuit;
 
     }
-
 
     public void setSuit(Suit inSuit) {
 
@@ -63,10 +63,4 @@ public class Card {
         return retVal;
     }
 
-
 }
-
-
-
-
-

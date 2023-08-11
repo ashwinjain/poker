@@ -9,8 +9,11 @@ import helpers.Hand;
 import helpers.HandController;
 import helpers.Card.Suit;
 
-public class Poker { 
-    public static void main(String[] args) {
+public class Poker {
+
+    private int winner;
+
+    public Poker() {
         ArrayList<Card> playerCards = new ArrayList<Card>();
         ArrayList<Card> dealerCards = new ArrayList<Card>();
 
@@ -36,22 +39,15 @@ public class Poker {
         dealerCards.add(oneDiamond);
         dealerCards.add(oneDiamond);
         dealerCards.add(oneDiamond);
-        
+
         Hand playerHand = new Hand(playerCards);
         Hand dealerHand = new Hand(dealerCards);
 
-
         HandController controller = new HandController();
-        int winner = controller.compareHands(dealerHand, playerHand);
+        winner = controller.compareHands(dealerHand, playerHand);
+    }
 
-        System.out.println(String.valueOf(winner));
-   
-
-
-
-        
-
-
-
+    public int getWinner() {
+        return winner;
     }
 }

@@ -47,10 +47,6 @@ app.get("/", (req, res) => {
   res.render("start");
 });
 
-app.get("/test", (req, res) => {
-  res.render("index");
-});
-
 app.post("/rooms", (req, res) => {
   res.render("index", { roomName: req.body.code, username: req.body.name });
   roomName = req.body.code;
@@ -123,6 +119,7 @@ io.on("connection", (socket) => {
       for (var i = 0; i < game.num_players; i++) {
         const id = game.currentOrder[i];
         const user_hand = new Hand(game.cards.shift(), game.cards.shift());
+        console.log(backendPlayers[id]);
         backendPlayers[id].hand = user_hand;
         io.to(id).emit("deal-user-hand", backendPlayers[id]);
       }
@@ -367,12 +364,18 @@ function dealNextCard(socket) {
     case "final_bet":
       game.state = "showdown";
       io.to(roomName).emit("showdown");
+      game.newGame();
   }
 }
 
 class Game {
   constructor(id) {
     this.playerOrder = [id];
+    this.state = "start";
+  }
+
+  newGame() {
+    this.playerOrder.push(this.playerOrder.shift);
     this.state = "start";
   }
   startGame() {
