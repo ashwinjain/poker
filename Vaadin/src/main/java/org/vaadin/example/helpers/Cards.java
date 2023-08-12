@@ -1,23 +1,23 @@
-package helpers;
+package org.vaadin.example.helpers;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import helpers.Card.Suit;
+import org.vaadin.example.helpers.Card.Suit;
 
 public class Cards {
 
     public static Map<String, Card> cards = new HashMap<String, Card>();
-    
+
     public Cards() {
-        Suit[] suits = new Suit[]{Suit.SPADES, Suit.CLUBS, Suit.DIAMONDS, Suit.HEARTS};
+        Suit[] suits = new Suit[] { Suit.SPADES, Suit.CLUBS, Suit.DIAMONDS, Suit.HEARTS };
 
-        int[] ranks = new int[]{2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
+        int[] ranks = new int[] { 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 };
 
-        
         for (int rank : ranks) {
             for (Suit suit : suits) {
                 String name = "";
-                switch(rank) {
+                switch (rank) {
                     case 11:
                         name = "J";
                         break;
@@ -34,7 +34,7 @@ public class Cards {
                         name += String.valueOf(rank);
 
                 }
-                switch(suit) {
+                switch (suit) {
                     case SPADES:
                         name += 'S';
                         break;
@@ -55,8 +55,8 @@ public class Cards {
             }
         }
 
-        
     }
+
     public String toString() {
         String retval = "";
         for (Map.Entry<String, Card> entry : cards.entrySet()) {

@@ -375,7 +375,7 @@ class Game {
   }
 
   newGame() {
-    this.playerOrder.push(this.playerOrder.shift);
+    this.playerOrder.push(this.playerOrder.shift());
     this.state = "start";
   }
   startGame() {

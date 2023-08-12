@@ -1,13 +1,11 @@
+package org.vaadin.example;
 
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.logging.Handler;
 
-import helpers.Card;
-import helpers.Cards;
-import helpers.Hand;
-import helpers.HandController;
-import helpers.Card.Suit;
+import org.vaadin.example.helpers.Card;
+import org.vaadin.example.helpers.Hand;
+import org.vaadin.example.helpers.HandController;
+import org.vaadin.example.helpers.Card.Suit;
 
 public class Poker {
 
@@ -45,6 +43,8 @@ public class Poker {
 
         HandController controller = new HandController();
         winner = controller.compareHands(dealerHand, playerHand);
+
+        // System.out.println(String.valueOf(winner));
     }
 
     public int getWinner() {

@@ -1,13 +1,10 @@
-package helpers;
-
+package org.vaadin.example.helpers;
 
 public class OnePair {
-
 
     private boolean mIsOnePair;
 
     private int mPairValue;
-
 
     public OnePair(boolean isOnePair, int pairValue) {
 
@@ -17,13 +14,11 @@ public class OnePair {
 
     }
 
-
     public boolean isOnePair() {
 
         return mIsOnePair;
 
     }
-
 
     public void setIsOnePair(boolean isOnePair) {
 
@@ -31,19 +26,16 @@ public class OnePair {
 
     }
 
-
     public int getPairValue() {
 
         return mPairValue;
 
     }
 
-
     public void setPairValue(int pairValue) {
 
         mPairValue = pairValue;
 
     }
-
 
 }

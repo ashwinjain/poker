@@ -1,4 +1,4 @@
-package helpers;
+package org.vaadin.example.helpers;
 
 
 import java.util.ArrayList;
