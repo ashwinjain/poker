@@ -11,6 +11,9 @@ import com.vaadin.flow.router.Route;
 @Route
 public class MainView extends Div {
 
+    // at the start of each new game when the cards are dealt, create a new MainActivity 
+    // create a list in order of who would win, and send that list back to the js file
+
     public MainView() {
         add(new H1("hello!"));
         callJs();
@@ -18,7 +21,7 @@ public class MainView extends Div {
 
     @ClientCallable
     public void greet() {
-        Poker poker = new Poker();
+        Poker poker = new Poker("z2s", "z3s");
         int winner = poker.getWinner();
         System.out.println("winner is " + winner);
     }

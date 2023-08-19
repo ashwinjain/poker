@@ -11,43 +11,80 @@ public class Poker {
 
     private int winner;
 
-    public Poker() {
-        ArrayList<Card> playerCards = new ArrayList<Card>();
-        ArrayList<Card> dealerCards = new ArrayList<Card>();
+    private Hand dealerHand;
+    private Hand playerHand;
 
-        Card tenSpades = new Card(10, Suit.SPADES);
-        Card jackSpades = new Card(11, Suit.SPADES);
-        Card queenSpades = new Card(12, Suit.SPADES);
-        Card kingSpades = new Card(13, Suit.SPADES);
-        Card aceSpades = new Card(14, Suit.SPADES);
-        Card oneDiamond = new Card(1, Suit.DIAMONDS);
+    public Poker(String first, String second) {
+        int firstRank = Integer.valueOf(first.charAt(1));
+        char firstSuit = first.charAt(2);
 
-        playerCards.add(tenSpades);
-        playerCards.add(jackSpades);
-        playerCards.add(queenSpades);
-        playerCards.add(kingSpades);
-        playerCards.add(aceSpades);
-        playerCards.add(aceSpades);
-        playerCards.add(aceSpades);
+        int secondRank = Integer.valueOf(first.charAt(1));
+        char secondSuit = first.charAt(2);
 
-        dealerCards.add(oneDiamond);
-        dealerCards.add(oneDiamond);
-        dealerCards.add(oneDiamond);
-        dealerCards.add(oneDiamond);
-        dealerCards.add(oneDiamond);
-        dealerCards.add(oneDiamond);
-        dealerCards.add(oneDiamond);
+        Card firstCard = new Card();
+        switch (firstSuit) {
+            case 's':
+                firstCard = new Card(firstRank, Suit.SPADES);
+                break;
+            case 'c':
+                firstCard = new Card(firstRank, Suit.CLUBS);
+                break;
+            case 'd':
+                firstCard = new Card(firstRank, Suit.DIAMONDS);
+                break;
 
-        Hand playerHand = new Hand(playerCards);
-        Hand dealerHand = new Hand(dealerCards);
+            case 'h':
+                firstCard = new Card(firstRank, Suit.HEARTS);
+                break;
+            default:
+                break;
+        }
 
-        HandController controller = new HandController();
-        winner = controller.compareHands(dealerHand, playerHand);
+        Card secondCard = new Card();
+        switch (secondSuit) {
+            case 's':
+                secondCard = new Card(secondRank, Suit.SPADES);
+                break;
+            case 'c':
+                secondCard = new Card(secondRank, Suit.CLUBS);
+                break;
+            case 'd':
+                secondCard = new Card(secondRank, Suit.DIAMONDS);
+                break;
 
-        // System.out.println(String.valueOf(winner));
+            case 'h':
+                firstCard = new Card(secondRank, Suit.HEARTS);
+                break;
+            default:
+                break;
+        }
+
+        ArrayList<Card> firstCards = new ArrayList<Card>();
+        ArrayList<Card> secondCards = new ArrayList<Card>() {
+
+            {
+                add(new Card(2, Suit.SPADES));
+                add(new Card(3, Suit.SPADES));
+                add(new Card(4, Suit.SPADES));
+                add(new Card(5, Suit.SPADES));
+                add(new Card(6, Suit.SPADES));
+                add(new Card(2, Suit.CLUBS));
+                add(new Card(3, Suit.DIAMONDS));
+            }
+        };
+        for (int i = 0; i < 7; i++) {
+            firstCards.add(firstCard);
+            // secondCards.add(secondCard);
+        }
+        dealerHand = new Hand(firstCards);
+
+        playerHand = new Hand(secondCards);
     }
 
     public int getWinner() {
+
+        HandController controller = new HandController();
+        winner = controller.compareHands(dealerHand, playerHand);
         return winner;
     }
 }

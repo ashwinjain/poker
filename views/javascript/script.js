@@ -7,11 +7,6 @@
 
 // initializing frontend client
 
-window.greet = function greet(name, element) {
-  console.log("Hi, " + name);
-  element.$server.greet();
-};
-
 const socket = io("http://localhost:3000");
 
 // new connections only have their one
