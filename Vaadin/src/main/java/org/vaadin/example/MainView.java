@@ -2,6 +2,7 @@
 package org.vaadin.example;
 
 import com.vaadin.flow.component.ClientCallable;
+import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
@@ -11,11 +12,15 @@ import com.vaadin.flow.router.Route;
 @Route
 public class MainView extends Div {
 
-    // at the start of each new game when the cards are dealt, create a new MainActivity 
-    // create a list in order of who would win, and send that list back to the js file
+    // at the start of each new game when the cards are dealt, create a new
+    // MainActivity
+    // create a list in order of who would win, and send that list back to the js
+    // file
 
     public MainView() {
-        add(new H1("hello!"));
+        add(new Html("""
+                <body>hello world</body>
+                """));
         callJs();
     }
 

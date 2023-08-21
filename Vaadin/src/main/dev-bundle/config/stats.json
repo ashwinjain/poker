@@ -264,7 +264,7 @@
   "Frontend/script.js"
  ],
  "frontendHashes": {
-  "script.js": "070b9151761c85170860b2bf4a73a7d455318837de8b091a36ae2d9f099c451f",
+  "script.js": "c85446d9eca81c286ae5ab64359941c5405f9849c339462732b687ce23c74621",
   "buttonFunctions.js": "c852123f9b2c44eb75e555119d3e05a7dbe78b91d0ab616feb9df1654474707d",
   "comboBoxConnector.js": "1d004c3dae9c76f8bcc68678abe1b8f7bdc8b456f5c9c4c7f190df8ed25d66cd",
   "contextMenuConnector.js": "25a200f8086461635ddd92316ebeb5a868294c8650a190efbae120edb1088f4f",
