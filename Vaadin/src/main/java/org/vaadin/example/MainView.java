@@ -3,9 +3,17 @@ package org.vaadin.example;
 
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Html;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.IFrame;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 
 @JavaScript("./script.js")
@@ -18,9 +26,21 @@ public class MainView extends Div {
     // file
 
     public MainView() {
-        add(new Html("""
-                <body>hello world</body>
-                """));
+        VerticalLayout todosList = new VerticalLayout();
+        TextField taskField = new TextField();
+        Button addButton = new Button("Add");
+        addButton.addClickListener(click -> {
+            Checkbox checkbox = new Checkbox(taskField.getValue());
+            todosList.add(checkbox);
+        });
+        addButton.addClickShortcut(Key.ENTER);
+
+        add(
+                new H1("Vaadin Todo"),
+                todosList,
+                new HorizontalLayout(
+                        taskField,
+                        addButton));
         callJs();
     }
 

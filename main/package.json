@@ -3,7 +3,6 @@
   "description": "java algorithm that classifies 7 cards by their best poker hand",
   "version": "1.0.0",
   "main": "public/script.js",
-  "type": "module",
   "directories": {
     "lib": "lib"
   },
